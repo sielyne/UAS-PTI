@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import '../styles/Status.css';
 
 const Status = ({ player, gameTime }) => {
   const updateBarColors = (barId, value) => {

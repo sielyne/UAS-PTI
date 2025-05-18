@@ -1,4 +1,5 @@
 import React from 'react';
+import '../styles/ActivityDetails.css';
 import HomeActivities from './activities/HomeActivities.jsx';
 import LakeActivities from './activities/LakeActivities.jsx';
 import MountainActivities from './activities/MountainActivities.jsx';

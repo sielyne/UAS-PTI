@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import gmvrCapy from '../gmvr_capy.gif';
-import gmvrDuck from '../gmvr_duck.gif';
-import gmvrChick from '../gmvr_chick.gif';
+import gmvrCapy from '/assets/gmvr_capy.gif';
+import gmvrDuck from '/assets/gmvr_duck.gif';
+import gmvrChick from '/assets/gmvr_chick.gif';
 
 const GameOverScreen = ({ player, onRestart }) => {
   const [avatarKey, setAvatarKey] = useState('');

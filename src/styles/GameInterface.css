@@ -1,0 +1,149 @@
+#game-interface {
+  /* display: flex; - Kita akan atur layout di kontainer parent */
+  flex-grow: 1; /* Agar peta bisa mengisi ruang vertikal yang tersedia */
+  width: 75%; /* Lebar 75% dari kontainer parent */
+  box-sizing: border-box; /* Untuk melihat batas */
+  border-radius: 4px;
+  overflow: hidden; 
+}
+
+#map-container{
+  width: auto;
+  height: auto; /* Agar map mengisi area GameInterface */
+}
+
+#game-map {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+#avatar-container {
+  /* Mungkin tidak perlu styling khusus di sini untuk layout ini */
+  display: none; /* Sembunyikan jika tidak ingin ditampilkan terpisah */
+}
+
+
+#joystick {
+  display: grid;
+  justify-content: flex-end;
+  align-items: flex-end;
+  right: 3vw;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  width: 150px;
+  height: 150px;
+  margin-top: 10px; /* Beri jarak dari ActivityDetails */
+}
+
+#joystick button {
+  margin: 5px;
+  padding: 10px;
+  font-size: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#joystick #up {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+#joystick #left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+#joystick #right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+#joystick #down {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+/*#game-interface {
+    display: grid;
+    position: relative;
+    justify-content: start;
+    align-items: start;
+    grid-column: 1 / 2;
+    grid-row: 2 / 3;
+    background-size: cover;
+    height: 78.5vh;
+    flex-direction: column;
+    background-position: top;
+    background-attachment: fixed;
+    text-align: start;
+    width: 100%;
+    max-width: 100%;
+    background-repeat: no-repeat;
+    overflow: auto;
+    z-index: 1;
+    top: 21.5vh;
+}
+#map-container {
+    width: 80%;
+    top: 0;
+    left: 0;
+}
+#joystick {
+    position: absolute;
+    bottom: 5%;
+    left: 50%;
+    margin: 20px auto 0 auto;
+    transform: translateX(-50%);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 5px;
+    width: 150px;
+    height: 150px;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 10px;
+    z-index: 999;
+}
+
+#joystick button {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 2px solid #333;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.5rem;
+    transition: all 0.2s ease;
+}
+
+#joystick button:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    transform: scale(1.1);
+}
+
+#joystick button:active {
+    background-color: #ffb700;
+}
+
+#up {
+    grid-column: 2; 
+    grid-row: 1;
+}
+
+#left {
+    grid-column: 1; 
+    grid-row: 2;
+}
+
+#right {
+    grid-column: 3; 
+    grid-row: 2;
+}
+
+#down {
+    grid-column: 2;
+    grid-row: 3;
+}

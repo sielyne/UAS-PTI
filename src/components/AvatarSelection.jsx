@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import '../styles/AvatarSelection.css'; 
+import React, { useState, useEffect } from 'react';
+import '../styles/AvatarSelection.css';
 
 const avatars = [
   '/assets/ayam ygy.png',
@@ -13,22 +13,33 @@ const AvatarSelection = ({ onAvatarSelect, onStartGame }) => {
 
   const selectedAvatar = avatars[currentAvatarIndex];
 
-  const handleNextAvatar = () => {
-    setCurrentAvatarIndex((prevIndex) => (prevIndex + 1) % avatars.length);
-  };
+  useEffect(() => {
+  onAvatarSelect(selectedAvatar); // Pilih avatar pertama saat komponen mount
+  }, []); // Array dependensi kosong, hanya berjalan sekali saat mount // Hanya bergantung pada onAvatarSelect // Hanya berjalan saat onAvatarSelect atau selectedAvatar berubah (termasuk mount awal)
 
-  const handlePrevAvatar = () => {
-    setCurrentAvatarIndex((prevIndex) => (prevIndex - 1 + avatars.length) % avatars.length);
-  };
+  const handleNextAvatar = () => {
+   setCurrentAvatarIndex((prevIndex) => {
+     const newIndex = (prevIndex + 1) % avatars.length;
+     onAvatarSelect(avatars[newIndex]); // Pastikan memanggil dengan avatar baru
+     return newIndex;
+   });
+ };
+
+ const handlePrevAvatar = () => {
+   setCurrentAvatarIndex((prevIndex) => {
+     const newIndex = (prevIndex - 1 + avatars.length) % avatars.length;
+     onAvatarSelect(avatars[newIndex]); // Pastikan memanggil dengan avatar baru
+     return newIndex;
+   });
+ };
 
   const handleStartGame = () => {
     if (!playerName.trim()) {
       alert("Masukkan nama terlebih dahulu!");
       return;
     }
-    
-    onAvatarSelect(selectedAvatar); // Dipanggil di sini saja
-    onStartGame(playerName);
+
+    onStartGame(playerName); // Pemilihan avatar sudah terjadi di useEffect dan handleNext/Prev
   };
 
   return (

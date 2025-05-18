@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from '../logo1.png';
+import logo from '/assets/logo1.png';
 
 const Title = () => (
   <div id="title">
