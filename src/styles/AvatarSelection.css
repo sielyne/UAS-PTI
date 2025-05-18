@@ -1,4 +1,33 @@
 
+#game-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+#avatar-selection {
+  text-align: center;
+}
+
+#avatar-display-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.avatar-img {
+  max-width: 200px;
+  max-height: 200px;
+}
+
+#input-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 
 body {
     font-family: Arial, sans-serif;
@@ -197,6 +226,53 @@ body {
 .swiper-pagination-bullet-active {
     background-color: rgb(10, 151, 12);
     opacity: 1;
+}
+
+@media (max-width: 600px) {
+    #title {
+        flex-direction: column;
+        height: auto;
+        padding: 10px;
+    }
+    
+    #title img {
+        width: 40px;
+        margin-right: 0;
+        margin-bottom: 5px;
+    }
+
+    #title h1 {
+        font-size: 1.2rem;
+    }
+    
+    #status-life {
+        flex-wrap: wrap;
+    }
+    
+    .life-bar {
+        width: 45%;
+        margin-bottom: 10px;
+    }
+    
+    #game-container {
+        width: 90%;
+        max-width: 90%;
+        padding: 10px;
+    }
+    
+    .swiper-slide img {
+        width: 90%;
+    }
+    
+    #joystick {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .activity-panel button {
+        font-size: 1rem;
+        padding: 8px;
+    }
 }
 
 

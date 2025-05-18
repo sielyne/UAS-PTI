@@ -1,71 +1,64 @@
-import { useState, useEffect } from 'react';
-import Swiper from 'swiper/bundle';
-import 'swiper/css/bundle';
-import '../styles/AvatarSelection.css';
+import React, { useState } from 'react';
+import '../styles/AvatarSelection.css'; 
 
+const avatars = [
+  '/assets/ayam ygy.png',
+  '/assets/bebek ygy.png',
+  '/assets/capi ygy.png',
+];
 
-export default function AvatarSelection({ onSelect, onStart }) {
-  const [selectedAvatar, setSelectedAvatar] = useState(null);
+const AvatarSelection = ({ onAvatarSelect, onStartGame }) => {
+  const [currentAvatarIndex, setCurrentAvatarIndex] = useState(0);
   const [playerName, setPlayerName] = useState('');
 
-  useEffect(() => {
-    new Swiper('.swiper-container', {
-      loop: true,
-      pagination: { el: '.swiper-pagination', clickable: true },
-      navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
-      keyboard: { enabled: true, onlyInViewport: true },
-    });
-  }, []);
+  const selectedAvatar = avatars[currentAvatarIndex];
 
-  function handleAvatarClick(avatar) {
-    setSelectedAvatar(avatar);
-    onSelect(avatar); // callback ke parent jika dibutuhkan
-  }
+  const handleNextAvatar = () => {
+    setCurrentAvatarIndex((prevIndex) => (prevIndex + 1) % avatars.length);
+  };
 
-  function handleStart() {
-    if (!playerName.trim()) return alert('Masukkan nama!');
-    if (!selectedAvatar) return alert('Pilih avatar dulu!');
-    onStart(playerName, selectedAvatar);
-  }
+  const handlePrevAvatar = () => {
+    setCurrentAvatarIndex((prevIndex) => (prevIndex - 1 + avatars.length) % avatars.length);
+  };
+
+  const handleStartGame = () => {
+    if (!playerName.trim()) {
+      alert("Masukkan nama terlebih dahulu!");
+      return;
+    }
+    
+    onAvatarSelect(selectedAvatar); // Dipanggil di sini saja
+    onStartGame(playerName);
+  };
 
   return (
-    <div>
-      <div id="title">
-          <img src="/assets/logo1.png"/>
-          <h1>Ucup Menjelajah Nusantara</h1>
-      </div>
+    <div id="game-container">
       <div id="avatar-selection">
         <h2>Pilih avatarmu!</h2>
-        <div className="swiper-container">
-          <div className="swiper-wrapper">
-            {["/assets/ayam ygy.png", "/assets/bebek ygy.png", "/assets/capi ygy.png"].map((img) => (
-              <div className="swiper-slide" key={img}>
-                <img
-                  src={img}
-                  alt={img}
-                  style={{
-                    border: selectedAvatar === img ? '5px solid green' : 'none'
-                  }}
-                  onClick={() => handleAvatarClick(img)}
-                />
-              </div>
-            ))}
-          </div>
-          <div className="swiper-button-next"></div>
-          <div className="swiper-button-prev"></div>
-          <div className="swiper-pagination"></div>
+        <div id="avatar-display-container">
+          <button onClick={handlePrevAvatar}>◄ Previous</button>
+          <img
+            src={selectedAvatar}
+            alt="Pilihan Avatar"
+            className="avatar-img"
+          />
+          <button onClick={handleNextAvatar}>Next ►</button>
         </div>
-
         <div id="input-section">
           <input
             type="text"
+            id="player-name"
             placeholder="Masukkan nama"
             value={playerName}
             onChange={(e) => setPlayerName(e.target.value)}
           />
-          <button onClick={handleStart}>Start</button>
+          <button id="next-button" onClick={handleStartGame}>
+            Start
+          </button>
         </div>
       </div>
-  </div>
+    </div>
   );
-}
+};
+
+export default AvatarSelection;
