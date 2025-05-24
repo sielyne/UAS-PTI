@@ -1,15 +1,37 @@
 #game-interface {
-  /* display: flex; - Kita akan atur layout di kontainer parent */
-  flex-grow: 1; /* Agar peta bisa mengisi ruang vertikal yang tersedia */
-  width: 75%; /* Lebar 75% dari kontainer parent */
-  box-sizing: border-box; /* Untuk melihat batas */
+  margin-top: 22vh; /* Sesuaikan dengan tinggi status */
+  margin-right: 20vw; /* Sisakan tempat buat inventory */
+  width: 80vw;
+  height: calc(100vh - 3.5vh); /* Sisakan ruang atas untuk status */
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+}
+
+
+@media (max-width: 768px) {
+  #game-interface {
+    margin: 0;
+    width: 100vw;
+    height: 60vh;
+    order: 2;
+  }
+}
+
+
+
+/*#game-interface {
+  display: flex; - Kita akan atur layout di kontainer parent 
+  flex-grow: 1; 
+  width: 75%;
+  box-sizing: border-box;
   border-radius: 4px;
   overflow: hidden; 
 }
 
 #map-container{
   width: auto;
-  height: auto; /* Agar map mengisi area GameInterface */
+  height: auto; 
 }
 
 #game-map {
@@ -19,8 +41,8 @@
 }
 
 #avatar-container {
-  /* Mungkin tidak perlu styling khusus di sini untuk layout ini */
-  display: none; /* Sembunyikan jika tidak ingin ditampilkan terpisah */
+ 
+  display: none; 
 }
 
 
@@ -33,7 +55,7 @@
   grid-template-rows: repeat(3, 1fr);
   width: 150px;
   height: 150px;
-  margin-top: 10px; /* Beri jarak dari ActivityDetails */
+  margin-top: 10px;
 }
 
 #joystick button {

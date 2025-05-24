@@ -1,16 +1,18 @@
 #status-container { /* Menggunakan nama yang konsisten */
   display: flex;
   flex-direction: column;
-  padding: 10px;
+  padding: 11px;
   position: fixed; /* Tetap di atas saat di-scroll */
   background-color: rgba(103, 164, 255, 0.6);
   top: 0;
   left: 0;
+  height: 15vh;
   font-weight: bold;
-  right: 0;
   z-index: 999; /* Pastikan di atas elemen lain */
-  width: 100%; /* Hampir penuh lebar */
+  width: 80vw; /* Hampir penuh lebar */
   box-sizing: border-box; /* Agar padding tidak menambah lebar */
+  backdrop-filter: blur(4px); /* Tambahan efek transparan modern */
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
 }
 
 #greeting-time {
@@ -18,6 +20,8 @@
   justify-content: space-between;
   width: 100%;
   margin-bottom: 10px;
+  font-size: 0.95em;
+  color: #0c2461;
 }
 
 #status-life {
@@ -25,6 +29,8 @@
   justify-content: space-around;
   width: 100%;
   gap: 4px;
+  align-items: center;
+  margin-top: 4px;
 }
 
 .life-bar {
@@ -32,21 +38,54 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+  font-size: 0.75em;
+  color: #1e272e;
 }
 
 .bar {
-  display: flex;
   width: 100px;
-  height: 15px;
+  height: 20px;
   background: #ddd;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.2);
+  margin-top: 2px;
 }
 
 .fill {
-  display: flex;
   height: 100%;
-  background: green;
+  background: linear-gradient(to right, #38ada9, #78e08f);
   transition: width 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  #status-container {
+    height: auto;
+    flex-direction: column;
+    padding: 10px;
+    width: 100vw;
+  }
+
+  #greeting-time {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 0.85em;
+  }
+
+  #status-life {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .bar {
+    width: 60px;
+    height: 8px;
+  }
+
+  .life-bar {
+    font-size: 0.7em;
+  }
 }
