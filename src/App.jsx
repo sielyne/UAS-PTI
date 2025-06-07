@@ -7,6 +7,7 @@ import Status from './components/Status.jsx';
 import GameOverScreen from './components/GameOverScreen.jsx';
 import Inventory from './components/Inventory.jsx';
 import Joystick from './components/Joystick.jsx';
+import './App.css';
 
 const App = () => {
   const [player, setPlayer] = useState({
@@ -328,7 +329,7 @@ const App = () => {
   };
 
   return (
-    <div>
+    <div className="app-container">
       {!gameStarted && (
         <AvatarSelection onAvatarSelect={selectAvatar} onStartGame={startGame} />
       )}
@@ -343,7 +344,7 @@ const App = () => {
         </div>
       )}
       {gameOver && <GameOverScreen player={player} onRestart={restartGame} />}
-    </div>
+    </div> {/*
   );
 };
 
