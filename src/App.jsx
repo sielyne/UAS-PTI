@@ -32,6 +32,12 @@ const App = () => {
   const [gameStarted, setGameStarted] = useState(false);
   const [timeInterval, setTimeInterval] = useState(null);
   const [gameOver, setGameOver] = useState(false);
+  const [isDoingActivity, setIsDoingActivity] = useState(false);
+  const [isFastForward, setIsFastForward] = useState(false);
+  const [activityInProgress, setActivityInProgress] = useState("");
+  const handleFastForward = () => {
+  setIsFastForward(true);
+};
 
   useEffect(() => {
     document.body.classList.add("fade-in");
@@ -339,6 +345,11 @@ const App = () => {
           <div className="game-content-area"> 
             //<Joystick onMove={handleMove} />
             <GameInterface player={player} /> 
+              {isDoingActivity && (
+                   <button onClick={handleFastForward} className="fast-forward-button">
+                   Fast Forward
+                   </button>
+              )}
             <Inventory playerInventory={player.inventory} playerMoney={player.money} />
           </div>
         </div>
