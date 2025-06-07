@@ -19,6 +19,7 @@
   width: 90vw;
   height: 90vh; 
   box-sizing: border-box;
+  overflow-y: auto;
 }
 
 .fade-in {
@@ -72,4 +73,22 @@ input[type="text"] {
   .app-container {
       padding: 0.5rem;
   }
+}
+.fast-forward-button {
+  margin: 1rem auto;
+  background-color: #28a745;
+}
+.fast-forward-button:hover {
+  background-color: #1e7e34;
+}
+.game-content-area {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.game-content-area > * {
+  flex: 1 1 300px;
+  min-width: 280px;
 }
