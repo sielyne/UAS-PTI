@@ -355,7 +355,7 @@ const App = () => {
         </div>
       )}
       {gameOver && <GameOverScreen player={player} onRestart={restartGame} />}
-    </div> {/*
+    </div> 
   );
 };
 
