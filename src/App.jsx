@@ -129,6 +129,13 @@ const App = () => {
     setGameOver(false);
   };
 
+  const calculateScore = () => {
+  let score = 0;
+  score += player.happiness + player.energy + player.hunger + player.hygiene;
+  score += Object.keys(player.inventory).length * 10;
+  return score;
+};
+
   const handleMove = (direction) => {
     if (player.energy < 5) {
       alert("You don't have enough energy to move!");
