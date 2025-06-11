@@ -13,7 +13,7 @@ const GameScreen = ({
   avatarPosition,
   onMove,
   onBackToMainMap,
-  onActivity
+  onActivity,
   isWalking //
 }) => {
   return (
