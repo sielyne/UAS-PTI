@@ -71,7 +71,8 @@ const MapAndAvatar = ({ player, avatarPosition }) => {
         <img
           src={player.avatar}
           alt="Player Avatar"
-          className={`player-avatar-image ${isWalking ? 'walking-avatar' : ''}`}
+          className="player-avatar-image walking-avatar"
+
         />
       </div>
     </div>
