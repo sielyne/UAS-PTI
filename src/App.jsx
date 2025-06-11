@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import AvatarSelection from './components/AvatarSelection';
 import GameScreen from './components/GameScreen';
 import GameOverScreen from './components/GameOverScreen';
+import EventPopup from './components/activities/EventPopup';
 import './index.css'; // Import general styles
 
 const App = () => {
@@ -25,6 +26,8 @@ const App = () => {
   const [gameStarted, setGameStarted] = useState(false);
   const [timeInterval, setTimeInterval] = useState(null);
   const [gameOver, setGameOver] = useState(false);
+  const [showEventPopup, setShowEventPopup] = useState(false);
+  const [currentEvent, setCurrentEvent] = useState(null);
 
   const mapAreas = {
     MainMap: {
@@ -35,6 +38,56 @@ const App = () => {
       Temple: { x: [40, 60], y: [70, 90] }
     }
   };
+
+  const locationEvents = {
+    Home: {
+      message: "You enjoy a cozy morning routine at home.", // Updated message
+      rewards: {
+        happiness: 15,
+        energy: 10,
+        inventory: { 'Comfort Food': { type: 'food', stock: 1 } }
+      },
+      activityRequired: true
+    },
+    Temple: {
+      message: "You pray at the temple and feel spiritually refreshed.", // Updated message
+      rewards: {
+        happiness: 25,
+        energy: 15,
+        inventory: { 'Meditation Guide': { type: 'tool', stock: 1 } }
+      },
+      activityRequired: true
+    },
+    Beach: {
+      message: "You find a rare seashell on the beach.", // Updated message
+      rewards: {
+        happiness: 20,
+        money: 300000,
+        inventory: { 'Rare Seashell': { type: 'collectible', stock: 1 } }
+      },
+      activityRequired: true
+    },
+    Lake: {
+      message: "You catch a big fish while relaxing by the lake.", // Updated message
+      rewards: {
+        happiness: 18,
+        hunger: 15,
+        inventory: { 'Freshwater Fish': { type: 'food', stock: 1 } }
+      },
+      activityRequired: true
+    },
+    Mountain: {
+      message: "You hike up the mountain and feel mentally clear.", // Updated message
+      rewards: {
+        happiness: 30,
+        energy: -10,
+        hygiene: -5,
+        inventory: { 'Mountain Herb': { type: 'plant', stock: 1 } }
+      },
+      activityRequired: true
+    }
+  };
+
 
   const selectAvatar = (avatarSrc) => {
     setPlayer(prevPlayer => ({ ...prevPlayer, avatar: avatarSrc }));
@@ -128,13 +181,15 @@ const App = () => {
     setGameTime({ hour: 8, minute: 0, day: 1 });
     setGameStarted(false);
     setGameOver(false);
+    setShowEventPopup(false);
+    setCurrentEvent(null);
   };
 
   const checkAreaTransition = (newX, newY) => {
     if (player.location === 'MainMap' && mapAreas.MainMap) {
       for (const [area, bounds] of Object.entries(mapAreas.MainMap)) {
         if (newX >= bounds.x[0] && newX <= bounds.x[1] &&
-            newY >= bounds.y[0] && newY <= bounds.y[1]) {
+          newY >= bounds.y[0] && newY <= bounds.y[1]) {
           setPlayer(prevPlayer => ({
             ...prevPlayer,
             location: area,
@@ -191,27 +246,94 @@ const App = () => {
     setAvatarPosition({ x: 50, y: 50 });
   };
 
+  const triggerLocationEvent = (location) => {
+    if (locationEvents[location]) {
+      setCurrentEvent({
+        location: location,
+        message: locationEvents[location].message,
+        rewards: locationEvents[location].rewards,
+        activityRequired: locationEvents[location].activityRequired || false
+      });
+      setShowEventPopup(true);
+    }
+  };
+
+  const applyEventRewards = () => {
+    if (currentEvent && currentEvent.rewards) {
+      const rewards = currentEvent.rewards;
+      let rewardMessage = `Event completed at ${currentEvent.location}!\n\nRewards received:\n`;
+
+      setPlayer(prevPlayer => {
+        let newPlayer = { ...prevPlayer };
+
+        if (rewards.happiness) {
+          newPlayer.happiness = Math.min(100, Math.max(0, prevPlayer.happiness + rewards.happiness));
+          rewardMessage += `• Happiness: ${rewards.happiness > 0 ? '+' : ''}${rewards.happiness}\n`;
+        }
+        if (rewards.energy) {
+          newPlayer.energy = Math.min(100, Math.max(0, prevPlayer.energy + rewards.energy));
+          rewardMessage += `• Energy: ${rewards.energy > 0 ? '+' : ''}${rewards.energy}\n`;
+        }
+        if (rewards.hunger) {
+          newPlayer.hunger = Math.min(100, Math.max(0, prevPlayer.hunger + rewards.hunger));
+          rewardMessage += `• Hunger: ${rewards.hunger > 0 ? '+' : ''}${rewards.hunger}\n`;
+        }
+        if (rewards.hygiene) {
+          newPlayer.hygiene = Math.min(100, Math.max(0, prevPlayer.hygiene + rewards.hygiene));
+          rewardMessage += `• Hygiene: ${rewards.hygiene > 0 ? '+' : ''}${rewards.hygiene}\n`;
+        }
+        if (rewards.money) {
+          newPlayer.money = Math.max(0, prevPlayer.money + rewards.money);
+          rewardMessage += `• Money: +Rp${rewards.money.toLocaleString()}\n`;
+        }
+
+        if (rewards.inventory) {
+          newPlayer.inventory = { ...prevPlayer.inventory };
+          for (const [itemName, itemData] of Object.entries(rewards.inventory)) {
+            if (newPlayer.inventory[itemName]) {
+              newPlayer.inventory[itemName].stock += itemData.stock;
+            } else {
+              newPlayer.inventory[itemName] = { ...itemData };
+            }
+            rewardMessage += `• ${itemName}: +${itemData.stock}\n`;
+          }
+        }
+
+        return newPlayer;
+      });
+
+      setTimeout(() => {
+        alert(rewardMessage);
+      }, 100);
+    }
+
+    setShowEventPopup(false);
+    setCurrentEvent(null);
+  };
+
   const handleActivity = (activity) => {
+    if (activity.startsWith('Go to ')) {
+      const targetLocation = activity.replace('Go to ', '');
+      if (mapAreas.MainMap[targetLocation]) {
+        setPlayer(prevPlayer => ({
+          ...prevPlayer,
+          location: targetLocation,
+          energy: Math.max(0, prevPlayer.energy - 5),
+          money: Math.max(0, prevPlayer.money - 500000),
+          happiness: Math.min(100, prevPlayer.happiness + 5),
+        }));
+        setAvatarPosition({ x: 50, y: 50 });
+        triggerLocationEvent(targetLocation);
+        return;
+      }
+    }
+
     switch (activity) {
-      case 'Work':
-        if (player.location === 'Home') {
-          setPlayer(prevPlayer => ({
-            ...prevPlayer,
-            money: prevPlayer.money + 500000,
-            energy: Math.max(0, prevPlayer.energy - 15),
-            hygiene: Math.max(0, prevPlayer.hygiene - 10),
-            hunger: Math.max(0, prevPlayer.hunger - 10),
-          }));
-          alert("Anda bekerja di rumah. +Rp500.000, -15 Energi, -10 Kebersihan, -10 Lapar.");
+      case 'Event':
+        if (currentEvent && currentEvent.location === player.location && currentEvent.activityRequired) {
+          applyEventRewards();
         } else {
-          setPlayer(prevPlayer => ({
-            ...prevPlayer,
-            money: prevPlayer.money + 1000000,
-            energy: Math.max(0, prevPlayer.energy - 20),
-            hygiene: Math.max(0, prevPlayer.hygiene - 15),
-            hunger: Math.max(0, prevPlayer.hunger - 15),
-          }));
-          alert(`Anda bekerja di ${player.location}. +Rp1.000.000, -20 Energi, -15 Kebersihan, -15 Lapar.`);
+          alert("No active event requires this activity at your current location, or the event is already completed!");
         }
         break;
 
@@ -378,6 +500,14 @@ const App = () => {
       )}
 
       {gameOver && <GameOverScreen player={player} onRestart={restartGame} />}
+
+      {showEventPopup && currentEvent && (
+        <EventPopup
+          event={currentEvent}
+          onClose={() => setShowEventPopup(false)}
+          onAttemptActivity={applyEventRewards}
+        />
+      )}
     </div>
   );
 };
