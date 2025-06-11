@@ -3,9 +3,9 @@
 .inventory-container {
     background-color: rgba(52, 73, 94, 0.95);
     color: white;
-    padding: 0.8rem; /* Kurangi padding container */
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    padding: 0.6rem; /* Lebih kecil lagi dari 0.8rem */
+    border-radius: 6px; /* Sedikit lebih kecil */
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3); /* Sedikit lebih kecil */
     box-sizing: border-box;
 
     display: flex;
@@ -15,8 +15,8 @@
 }
 
 .inventory-title {
-    margin: 0 0 0.6rem 0; /* Kurangi margin bawah judul */
-    font-size: 1.2rem; /* Kurangi ukuran font judul */
+    margin: 0 0 0.5rem 0; /* Lebih kecil lagi dari 0.6rem */
+    font-size: 1.1rem; /* Lebih kecil lagi dari 1.2rem */
     color: #f39c12;
     text-align: center;
     flex-shrink: 0;
@@ -25,8 +25,8 @@
 .inventory-items-list {
     flex: 1;
     overflow-y: auto;
-    padding-right: 5px;
-    margin-bottom: 0.8rem; /* Kurangi margin bawah daftar item */
+    padding-right: 4px; /* Lebih kecil lagi dari 5px */
+    margin-bottom: 0.6rem; /* Lebih kecil lagi dari 0.8rem */
 
     /* Styling scrollbar */
     scrollbar-width: thin;
@@ -35,7 +35,7 @@
 
 /* Webkit scrollbar styling */
 .inventory-items-list::-webkit-scrollbar {
-    width: 7px; /* Sedikit lebih kecil dari 8px */
+    width: 6px; /* Lebih kecil lagi dari 7px */
 }
 
 .inventory-items-list::-webkit-scrollbar-track {
@@ -46,7 +46,7 @@
 .inventory-items-list::-webkit-scrollbar-thumb {
     background: #f39c12;
     border-radius: 10px;
-    border: 2px solid #2c3e50;
+    border: 1px solid #2c3e50; /* Border sedikit lebih tipis */
 }
 
 .inventory-items-list::-webkit-scrollbar-thumb:hover {
@@ -56,17 +56,17 @@
 .inventory-empty-message {
     text-align: center;
     font-style: italic;
-    color: rgba(255, 255, 255, 0.7);
-    padding: 0.5rem 0; /* Kurangi padding pesan kosong */
-    font-size: 0.9rem; /* Kurangi ukuran font pesan kosong */
+    color: rgba(255, 255, 255, 0.6); /* Sedikit lebih transparan */
+    padding: 0.4rem 0; /* Lebih kecil lagi dari 0.5rem */
+    font-size: 0.85rem; /* Lebih kecil lagi dari 0.9rem */
 }
 
 .inventory-item {
     display: flex;
     justify-content: space-between;
-    padding: 0.3rem 0; /* Kurangi padding item individu */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08); /* Sedikit lebih transparan */
-    font-size: 0.9rem; /* Kurangi ukuran font item */
+    padding: 0.25rem 0; /* Lebih kecil lagi dari 0.3rem */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* Lebih transparan */
+    font-size: 0.85rem; /* Lebih kecil lagi dari 0.9rem */
 }
 
 .inventory-item:last-child {
@@ -84,10 +84,11 @@
 .inventory-money {
     margin-top: auto;
     text-align: center;
-    font-size: 1rem; /* Kurangi ukuran font uang */
+    font-size: 0.95rem; /* Lebih kecil lagi dari 1rem */
     font-weight: bold;
     color: #2ecc71;
     flex-shrink: 0;
 }
 
 /* Media queries for responsiveness (jika ada, sesuaikan lagi padding/margin di sini) */
+/* Tidak ada perubahan pada media queries jika belum ada */

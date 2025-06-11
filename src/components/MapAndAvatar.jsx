@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from 'react';
+// src/components/MapAndAvatar.jsx
+import React, { useEffect } from 'react'; // Hapus useState
 import '../styles/MapAndAvatar.css';
 
+// isWalking sekarang diterima sebagai prop
 const MapAndAvatar = ({ player, avatarPosition, isWalking }) => {
-    console.log("Render Avatar:", player.avatar, isWalking);
+  console.log("Render Avatar:", player.avatar, "Is Walking:", isWalking); // Tambahkan log isWalking
+
   const getLocationImage = (location) => {
     switch (location) {
       case 'Home': return '/assets/HomeMap.png';
@@ -15,9 +18,11 @@ const MapAndAvatar = ({ player, avatarPosition, isWalking }) => {
     }
   };
 
+  // HAPUS useEffect ini sepenuhnya, karena penanganan keyboard dan isWalking
+  // sudah dipindahkan ke App.js
+  /*
   useEffect(() => {
     let keysPressed = {};
-
     const handleKeyDown = (e) => {
       keysPressed[e.key] = true;
       if (
@@ -26,10 +31,9 @@ const MapAndAvatar = ({ player, avatarPosition, isWalking }) => {
         keysPressed["w"] || keysPressed["a"] ||
         keysPressed["s"] || keysPressed["d"]
       ) {
-        setIsWalking(true);
+        setIsWalking(true); // INI AKAN DIHAPUS BERSAMA useEffect
       }
     };
-
     const handleKeyUp = (e) => {
       keysPressed[e.key] = false;
       if (
@@ -38,18 +42,17 @@ const MapAndAvatar = ({ player, avatarPosition, isWalking }) => {
         !keysPressed["w"] && !keysPressed["a"] &&
         !keysPressed["s"] && !keysPressed["d"]
       ) {
-        setIsWalking(false);
+        setIsWalking(false); // INI AKAN DIHAPUS BERSAMA useEffect
       }
     };
-
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
-
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
   }, []);
+  */
 
   return (
     <div className="map-and-avatar-container">
@@ -69,6 +72,7 @@ const MapAndAvatar = ({ player, avatarPosition, isWalking }) => {
         <img
           src={player.avatar}
           alt="Player Avatar"
+          // Class ini sekarang sepenuhnya bergantung pada prop isWalking dari App.js
           className={`player-avatar-image ${isWalking ? 'walking-avatar' : ''}`}
         />
       </div>

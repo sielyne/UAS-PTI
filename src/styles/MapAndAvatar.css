@@ -8,13 +8,13 @@
   display: flex; /* Untuk memusatkan gambar di dalamnya jika ada sisa ruang */
   justify-content: center;
   align-items: center;
-  overflow: hidden; /* Penting untuk mencegah scroll jika gambar meluap */
+  overflow: hidden;
 }
 
 .map-image {
   width: 100%;
   height: 100%;
-  object-fit: contain; /* KUNCI: Membuat seluruh gambar terlihat, dengan letterboxing jika rasio aspek tidak cocok */
+  object-fit: fill; /* DIUBAH: Dari 'contain' menjadi 'fill' untuk membuat gambar stretch */
   display: block; /* Menghilangkan spasi ekstra di bawah gambar */
 }
 

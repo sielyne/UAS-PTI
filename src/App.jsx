@@ -1,9 +1,9 @@
-
-import React, { useState, useEffect, useCallback } from 'react';
+// src/App.js
+import React, { useState, useEffect, useCallback } from 'react'; // Import useCallback
 import AvatarSelection from './components/AvatarSelection';
 import GameScreen from './components/GameScreen';
 import GameOverScreen from './components/GameOverScreen';
-import EventPopup from './components/activities/EventPopup'; // Pastikan path sudah benar
+import EventPopup from './components/activities/EventPopup';
 import './index.css';
 
 const CONSUMABLE_FOOD_EFFECTS = {
@@ -13,7 +13,7 @@ const CONSUMABLE_FOOD_EFFECTS = {
 };
 
 const App = () => {
-   const [isWalking, setIsWalking] = useState(false);
+  const [isWalking, setIsWalking] = useState(false); // Pindahkan state isWalking ke sini
   const [player, setPlayer] = useState({
     name: "",
     avatar: "",
@@ -30,34 +30,6 @@ const App = () => {
   });
 
   const [avatarPosition, setAvatarPosition] = useState({ x: 50, y: 50 });
-   useEffect(() => {
-  const handleKeyDown = (event) => {
-    if (!gameStarted || gameOver) return;
-
-    switch (event.key.toLowerCase()) {
-      case 'w':
-        handleMove('up');
-        break;
-      case 'a':
-        handleMove('left');
-        break;
-      case 's':
-        handleMove('down');
-        break;
-      case 'd':
-        handleMove('right');
-        break;
-      default:
-        break;
-    }
-  };
-
-  window.addEventListener('keydown', handleKeyDown);
-  return () => {
-    window.removeEventListener('keydown', handleKeyDown);
-  };
-}, [gameStarted, gameOver, handleMove]);
-
   const [gameTime, setGameTime] = useState({ hour: 8, minute: 0, day: 1 });
   const [gameStarted, setGameStarted] = useState(false);
   const [timeInterval, setTimeInterval] = useState(null);
@@ -65,7 +37,6 @@ const App = () => {
   const [showEventPopup, setShowEventPopup] = useState(false);
   const [currentEvent, setCurrentEvent] = useState(null);
 
-   
   const mapAreas = {
     MainMap: {
       Home: { x: [10, 30], y: [10, 30] },
@@ -129,7 +100,17 @@ const App = () => {
     setPlayer(prevPlayer => ({ ...prevPlayer, avatar: avatarSrc }));
   };
 
-  const startGameTime = () => {
+  const decreasePlayerStatus = useCallback(() => { // Gunakan useCallback
+    setPlayer(prevPlayer => ({
+      ...prevPlayer,
+      hunger: Math.max(0, prevPlayer.hunger - 1),
+      hygiene: Math.max(0, prevPlayer.hygiene - 1),
+      energy: Math.max(0, prevPlayer.energy - 1),
+      happiness: Math.max(0, prevPlayer.happiness - 1),
+    }));
+  }, []); // Dependencies kosong karena setPlayer sudah dijamin stabil oleh React
+
+  const startGameTime = useCallback(() => { // Gunakan useCallback
     const REAL_WORLD_INTERVAL_MS = 20 * 1000;
     const GAME_TIME_INCREMENT_MINUTES = 10;
 
@@ -144,7 +125,7 @@ const App = () => {
           newMinute %= 60;
 
           if (Math.floor(prevTime.hour / 6) !== Math.floor(newHour / 6)) {
-            decreasePlayerStatus();
+            decreasePlayerStatus(); // Memanggil useCallback
           }
         }
 
@@ -157,17 +138,7 @@ const App = () => {
       });
     }, REAL_WORLD_INTERVAL_MS);
     setTimeInterval(interval);
-  };
-
-  const decreasePlayerStatus = () => {
-    setPlayer(prevPlayer => ({
-      ...prevPlayer,
-      hunger: Math.max(0, prevPlayer.hunger - 1),
-      hygiene: Math.max(0, prevPlayer.hygiene - 1),
-      energy: Math.max(0, prevPlayer.energy - 1),
-      happiness: Math.max(0, prevPlayer.happiness - 1),
-    }));
-  };
+  }, [decreasePlayerStatus]); // decreasePlayerStatus adalah dependency
 
   useEffect(() => {
     if (
@@ -221,7 +192,19 @@ const App = () => {
     setCurrentEvent(null);
   };
 
-  const checkAreaTransition = (newX, newY) => {
+  const triggerLocationEvent = useCallback((location) => { // Gunakan useCallback
+    if (locationEvents[location]) {
+      setCurrentEvent({
+        location: location,
+        message: locationEvents[location].message,
+        rewards: locationEvents[location].rewards,
+        activityRequired: locationEvents[location].activityRequired || false
+      });
+      setShowEventPopup(true);
+    }
+  }, []); // Dependencies kosong karena locationEvents sudah stabil
+
+  const checkAreaTransition = useCallback((newX, newY) => { // Gunakan useCallback
     if (player.location === 'MainMap' && mapAreas.MainMap) {
       for (const [area, bounds] of Object.entries(mapAreas.MainMap)) {
         if (newX >= bounds.x[0] && newX <= bounds.x[1] &&
@@ -241,9 +224,9 @@ const App = () => {
       }
     }
     return false;
-  };
+  }, [player.location, mapAreas.MainMap, triggerLocationEvent]); // Dependencies
 
-  const handleMove = (direction) => {
+  const handleMove = useCallback((direction) => { // Gunakan useCallback
     if (player.energy < 5) {
       alert("You don't have enough energy to move!");
       return;
@@ -277,57 +260,36 @@ const App = () => {
         energy: Math.max(0, prevPlayer.energy - 1)
       }));
     }
-  };
+  }, [player.energy, avatarPosition, checkAreaTransition]); // Dependencies
 
-  const handleBackToMainMap = () => {
+  const handleBackToMainMap = useCallback(() => { // Gunakan useCallback
     setPlayer(prevPlayer => ({ ...prevPlayer, location: 'MainMap' }));
     setAvatarPosition({ x: 50, y: 50 });
-  };
+  }, []); // Dependencies kosong, setPlayer dan setAvatarPosition adalah fungsi React yang stabil
 
-  const triggerLocationEvent = (location) => {
-    if (locationEvents[location]) {
-      setCurrentEvent({
-        location: location,
-        message: locationEvents[location].message,
-        rewards: locationEvents[location].rewards,
-        activityRequired: locationEvents[location].activityRequired || false
-      });
-      setShowEventPopup(true);
-    }
-  };
-
-  // src/App.js - di dalam fungsi applyEventRewards
-
-const applyEventRewards = () => {
-    console.log("App.js: Fungsi applyEventRewards dipanggil.");
-    console.log("App.js: currentEvent sebelum proses reward:", currentEvent); // LOG BARU
-
+  const applyEventRewards = useCallback(() => { // Gunakan useCallback
     if (currentEvent && currentEvent.rewards) {
-        console.log("App.js: currentEvent dan rewards valid."); // LOG BARU
         const rewards = currentEvent.rewards;
         let rewardMessage = `Event completed at ${currentEvent.location}!\n\nRewards received:\n`;
 
         setPlayer(prevPlayer => {
-            console.log("App.js: Inside setPlayer callback. prevPlayer state:", prevPlayer);
-            console.log("App.js: Rewards untuk event ini:", rewards);
-
             let newPlayer = { ...prevPlayer };
 
             if (rewards.happiness) {
                 newPlayer.happiness = Math.min(100, Math.max(0, prevPlayer.happiness + rewards.happiness));
-                rewardMessage += `• Happiness: <span class="math-inline">\{rewards\.happiness \> 0 ? '\+' \: ''\}</span>{rewards.happiness}\n`;
+                rewardMessage += `• Happiness: ${rewards.happiness > 0 ? '+' : ''}${rewards.happiness}\n`;
             }
             if (rewards.energy) {
                 newPlayer.energy = Math.min(100, Math.max(0, prevPlayer.energy + rewards.energy));
-                rewardMessage += `• Energy: <span class="math-inline">\{rewards\.energy \> 0 ? '\+' \: ''\}</span>{rewards.energy}\n`;
+                rewardMessage += `• Energy: ${rewards.energy > 0 ? '+' : ''}${rewards.energy}\n`;
             }
             if (rewards.hunger) {
                 newPlayer.hunger = Math.min(100, Math.max(0, prevPlayer.hunger + rewards.hunger));
-                rewardMessage += `• Hunger: <span class="math-inline">\{rewards\.hunger \> 0 ? '\+' \: ''\}</span>{rewards.hunger}\n`;
+                rewardMessage += `• Hunger: ${rewards.hunger > 0 ? '+' : ''}${rewards.hunger}\n`;
             }
             if (rewards.hygiene) {
                 newPlayer.hygiene = Math.min(100, Math.max(0, prevPlayer.hygiene + rewards.hygiene));
-                rewardMessage += `• Hygiene: <span class="math-inline">\{rewards\.hygiene \> 0 ? '\+' \: ''\}</span>{rewards.hygiene}\n`;
+                rewardMessage += `• Hygiene: ${rewards.hygiene > 0 ? '+' : ''}${rewards.hygiene}\n`;
             }
             if (rewards.money) {
                 newPlayer.money = Math.max(0, prevPlayer.money + rewards.money);
@@ -335,44 +297,30 @@ const applyEventRewards = () => {
             }
 
             if (rewards.inventory) {
-                console.log("App.js: Memproses reward inventory. Rewards:", rewards.inventory); // LOG BARU
                 newPlayer.inventory = { ...prevPlayer.inventory };
                 for (const [itemName, itemData] of Object.entries(rewards.inventory)) {
-                    console.log(`App.js: Memproses item: ${itemName}, data:`, itemData); // LOG BARU
                     if (newPlayer.inventory[itemName]) {
-                        console.log(`App.js: Item ${itemName} sudah ada, stok sebelumnya: ${newPlayer.inventory[itemName].stock}`); // LOG BARU
                         newPlayer.inventory[itemName] = {
                             ...newPlayer.inventory[itemName],
                             stock: newPlayer.inventory[itemName].stock + itemData.stock
                         };
-                        console.log(`App.js: Item ${itemName} stok baru: ${newPlayer.inventory[itemName].stock}`); // LOG BARU
                     } else {
-                        console.log(`App.js: Item ${itemName} baru, ditambahkan.`); // LOG BARU
                         newPlayer.inventory[itemName] = { ...itemData };
                     }
-                    rewardMessage += `• <span class="math-inline">\{itemName\}\: \+</span>{itemData.stock}\n`;
+                    rewardMessage += `• ${itemName}: +${itemData.stock}\n`;
                 }
-                console.log("App.js: Inventory setelah update (dalam callback setPlayer):", newPlayer.inventory); // LOG BARU
             }
-
-            console.log("App.js: Calculated newPlayer state (before returning):", newPlayer);
             return newPlayer;
         });
-
         alert(rewardMessage);
-
     } else {
-        console.log("App.js: currentEvent atau currentEvent.rewards tidak valid. currentEvent:", currentEvent);
-        alert("Error: Event data corrupted or not found for rewards!"); // Beri tahu pemain jika ada masalah data
+        alert("Error: Event data corrupted or not found for rewards!");
     }
-
-    console.log("App.js: Menutup popup event dan mereset currentEvent..."); // LOG BARU
     setShowEventPopup(false);
     setCurrentEvent(null);
-    console.log("App.js: Event popup ditutup dan currentEvent di-reset.");
-};
+}, [currentEvent]); // currentEvent adalah dependency
 
-  const handleActivity = (activity) => {
+  const handleActivity = useCallback((activity) => { // Gunakan useCallback
     if (activity.startsWith('Go to ')) {
       const targetLocation = activity.replace('Go to ', '');
       if (mapAreas.MainMap[targetLocation]) {
@@ -411,19 +359,17 @@ const applyEventRewards = () => {
             setPlayer(prevPlayer => {
               let newPlayer = { ...prevPlayer };
 
-              // --- PASTIKAN JUGA UPDATE INVENTORY DI SINI BENAR ---
               newPlayer.inventory = {
                 ...newPlayer.inventory,
                 [itemToEat]: {
-                  ...newPlayer.inventory[itemToEat], // Salin properti yang ada
-                  stock: newPlayer.inventory[itemToEat].stock - 1 // Kurangi stok
+                  ...newPlayer.inventory[itemToEat],
+                  stock: newPlayer.inventory[itemToEat].stock - 1
                 }
               };
               if (newPlayer.inventory[itemToEat].stock <= 0) {
                 const { [itemToEat]: _, ...restInventory } = newPlayer.inventory;
                 newPlayer.inventory = restInventory;
               }
-              // --- END UPDATE INVENTORY DI SINI BENAR ---
 
               let msg = `Anda makan ${itemToEat}. `;
               if (effects.hunger) {
@@ -529,7 +475,6 @@ const applyEventRewards = () => {
               ...prevPlayer,
               money: prevPlayer.money - 200000,
               happiness: Math.min(100, prevPlayer.happiness + 20),
-              // --- PASTIKAN JUGA UPDATE INVENTORY DI SINI BENAR ---
               inventory: {
                 ...prevPlayer.inventory,
                 'Souvenir': {
@@ -537,7 +482,6 @@ const applyEventRewards = () => {
                   stock: (prevPlayer.inventory['Souvenir']?.stock || 0) + 1
                 }
               }
-              // --- END UPDATE INVENTORY DI SINI BENAR ---
             }));
             alert(`Anda membeli suvenir di ${player.location}. -Rp200.000, +20 Kebahagiaan, +1 Suvenir.`);
           } else {
@@ -578,34 +522,36 @@ const applyEventRewards = () => {
       default:
         break;
     }
-  };
+  }, [player, currentEvent, applyEventRewards, mapAreas, triggerLocationEvent]); // Dependencies
 
+  // Ini adalah useEffect utama untuk penanganan keyboard
   useEffect(() => {
+    let keysPressed = {}; // Untuk melacak tombol yang ditekan (agar bisa tahu saat tidak ada tombol ditekan)
+
     const handleKeyDown = (event) => {
       if (!gameStarted || gameOver || showEventPopup) {
-        return; 
+        setIsWalking(false); // Pastikan avatar berhenti "berjalan" jika game tidak aktif atau popup muncul
+        return;
       }
 
+      keysPressed[event.key.toLowerCase()] = true;
+
       let direction = null;
-      switch (event.key) {
-        case 'ArrowUp':
+      switch (event.key.toLowerCase()) {
+        case 'arrowup':
         case 'w':
-        case 'W':
           direction = 'up';
           break;
-        case 'ArrowDown':
+        case 'arrowdown':
         case 's':
-        case 'S':
           direction = 'down';
           break;
-        case 'ArrowLeft':
+        case 'arrowleft':
         case 'a':
-        case 'A':
           direction = 'left';
           break;
-        case 'ArrowRight':
+        case 'arrowright':
         case 'd':
-        case 'D':
           direction = 'right';
           break;
         default:
@@ -613,17 +559,32 @@ const applyEventRewards = () => {
       }
 
       if (direction) {
-        event.preventDefault(); 
+        event.preventDefault(); // Mencegah scrolling halaman
         handleMove(direction);
+        setIsWalking(true); // Set isWalking menjadi true saat ada gerakan
+      }
+    };
+
+    const handleKeyUp = (event) => {
+      keysPressed[event.key.toLowerCase()] = false;
+
+      // Cek apakah ada tombol movement yang masih ditekan
+      const anyMovementKey = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright']
+                               .some(key => keysPressed[key]);
+
+      if (!anyMovementKey) {
+        setIsWalking(false); // Set isWalking menjadi false jika tidak ada tombol movement yang ditekan
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [gameStarted, gameOver, showEventPopup, handleMove]);
+  }, [gameStarted, gameOver, showEventPopup, handleMove]); // Dependencies
 
   return (
     <div className="app-container">
@@ -639,7 +600,7 @@ const applyEventRewards = () => {
           onMove={handleMove}
           onBackToMainMap={handleBackToMainMap}
           onActivity={handleActivity}
-          isWalking={isWalking}
+          isWalking={isWalking} // Lewatkan isWalking dari state App
         />
       )}
 
