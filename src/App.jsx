@@ -20,7 +20,6 @@ const App = () => {
       'Daging': { type: 'food', stock: 2 },
       'Mobil': { type: 'transport', stock: 1 },
     }
-     console.log("Render App", player, avatarPosition, isWalking);
   });
 
   const [avatarPosition, setAvatarPosition] = useState({ x: 50, y: 50 });
@@ -31,6 +30,7 @@ const App = () => {
   const [showEventPopup, setShowEventPopup] = useState(false);
   const [currentEvent, setCurrentEvent] = useState(null);
 
+   
   const mapAreas = {
     MainMap: {
       Home: { x: [10, 30], y: [10, 30] },
@@ -39,6 +39,25 @@ const App = () => {
       Beach: { x: [70, 90], y: [70, 90] },
       Temple: { x: [40, 60], y: [70, 90] }
     }
+     const App = () => {
+  const [isWalking, setIsWalking] = useState(false);
+  const [player, setPlayer] = useState({ ... });
+  const [avatarPosition, setAvatarPosition] = useState({ x: 50, y: 50 });
+  // ... state lainnya
+
+  // Logging render App
+  console.log("Render App", player, avatarPosition, isWalking);
+
+  // ... semua fungsi lainnya dan useEffect
+  // ...
+  
+  return (
+    <>
+      {/* Komponen UI */}
+    </>
+  );
+};
+
   };
 
   const locationEvents = {
