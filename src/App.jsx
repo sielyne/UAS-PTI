@@ -23,6 +23,34 @@ const App = () => {
   });
 
   const [avatarPosition, setAvatarPosition] = useState({ x: 50, y: 50 });
+   useEffect(() => {
+  const handleKeyDown = (event) => {
+    if (!gameStarted || gameOver) return;
+
+    switch (event.key.toLowerCase()) {
+      case 'w':
+        handleMove('up');
+        break;
+      case 'a':
+        handleMove('left');
+        break;
+      case 's':
+        handleMove('down');
+        break;
+      case 'd':
+        handleMove('right');
+        break;
+      default:
+        break;
+    }
+  };
+
+  window.addEventListener('keydown', handleKeyDown);
+  return () => {
+    window.removeEventListener('keydown', handleKeyDown);
+  };
+}, [gameStarted, gameOver, handleMove]);
+
   const [gameTime, setGameTime] = useState({ hour: 8, minute: 0, day: 1 });
   const [gameStarted, setGameStarted] = useState(false);
   const [timeInterval, setTimeInterval] = useState(null);
