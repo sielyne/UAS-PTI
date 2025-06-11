@@ -8,6 +8,7 @@ const [isWalking, setisWalking] = useState(false);
 
 
 const App = () => {
+   console.log("Render App", player, avatarPosition, isWalking);
   const [player, setPlayer] = useState({
     name: "",
     avatar: "",
