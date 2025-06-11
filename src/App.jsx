@@ -4,11 +4,9 @@ import GameScreen from './components/GameScreen';
 import GameOverScreen from './components/GameOverScreen';
 import EventPopup from './components/activities/EventPopup';
 import './index.css'; // Import general styles
-const [isWalking, setisWalking] = useState(false);
-
 
 const App = () => {
-   console.log("Render App", player, avatarPosition, isWalking);
+   const [isWalking, setIsWalking] = useState(false);
   const [player, setPlayer] = useState({
     name: "",
     avatar: "",
@@ -22,6 +20,7 @@ const App = () => {
       'Daging': { type: 'food', stock: 2 },
       'Mobil': { type: 'transport', stock: 1 },
     }
+     console.log("Render App", player, avatarPosition, isWalking);
   });
 
   const [avatarPosition, setAvatarPosition] = useState({ x: 50, y: 50 });
