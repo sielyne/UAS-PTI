@@ -4,6 +4,8 @@ import GameScreen from './components/GameScreen';
 import GameOverScreen from './components/GameOverScreen';
 import EventPopup from './components/activities/EventPopup';
 import './index.css'; // Import general styles
+const [isWalking, setIsWalking] = useState(false);
+
 
 const App = () => {
   const [player, setPlayer] = useState({
@@ -206,6 +208,7 @@ const App = () => {
   };
 
   const handleMove = (direction) => {
+    setIsWalking(true);
     if (player.energy < 5) {
       alert("You don't have enough energy to move!");
       return;
@@ -239,6 +242,7 @@ const App = () => {
         energy: Math.max(0, prevPlayer.energy - 1)
       }));
     }
+    setTimeout(() => setIsWalking(false), 500);
   };
 
   const handleBackToMainMap = () => {
@@ -496,6 +500,7 @@ const App = () => {
           onMove={handleMove}
           onBackToMainMap={handleBackToMainMap}
           onActivity={handleActivity}
+          isWalking={isWalking}
         />
       )}
 
