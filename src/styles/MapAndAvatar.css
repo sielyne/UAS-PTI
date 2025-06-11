@@ -41,6 +41,6 @@
 }
 
 .walking-avatar {
-  animation: tuingWalk 0.6s infinite;
+  animation: tuingWalk 0.4s infinite;
   transition: transform 0.2s;
 }
