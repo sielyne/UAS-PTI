@@ -91,9 +91,3 @@
 }
 
 /* Media queries for responsiveness (jika ada, sesuaikan lagi padding/margin di sini) */
-@media (max-width: 1024px) {
-    .inventory-container {
-        /* Pertahankan flex: 1 dan min-height: 0 jika sudah bekerja */
-        /* Anda mungkin ingin menyesuaikan padding/margin lebih lanjut di sini untuk layar kecil */
-    }
-}

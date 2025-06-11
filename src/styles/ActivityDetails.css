@@ -171,7 +171,3 @@
     color: #f39c12;
 }
 
-/* Styling Main Map Events title (dari GameScreen.css) agar konsisten */
-.game-right-sidebar .activity-details-title {
-    /* Aturan ini bertujuan untuk konsistensi, biarkan saja jika tidak ada konflik serius */
-}
