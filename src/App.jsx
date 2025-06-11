@@ -4,7 +4,7 @@ import GameScreen from './components/GameScreen';
 import GameOverScreen from './components/GameOverScreen';
 import EventPopup from './components/activities/EventPopup';
 import './index.css'; // Import general styles
-const [isWalking, setIsWalking] = useState(false);
+const [isWalking, setisWalking] = useState(false);
 
 
 const App = () => {
