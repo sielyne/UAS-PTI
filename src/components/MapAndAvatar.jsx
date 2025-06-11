@@ -4,7 +4,6 @@ import '../styles/MapAndAvatar.css';
 const MapAndAvatar = ({ player, avatarPosition }) => {
   const [isWalking, setIsWalking] = useState(false);
 
-  // Fungsi untuk mengambil gambar lokasi
   const getLocationImage = (location) => {
     switch (location) {
       case 'Home': return '/assets/HomeMap.png';
@@ -71,8 +70,7 @@ const MapAndAvatar = ({ player, avatarPosition }) => {
         <img
           src={player.avatar}
           alt="Player Avatar"
-          className="player-avatar-image walking-avatar"
-
+          className={`player-avatar-image ${isWalking ? 'walking-avatar' : ''}`}
         />
       </div>
     </div>
