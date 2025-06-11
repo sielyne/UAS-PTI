@@ -30,11 +30,10 @@ const MapAndAvatar = ({ player, avatarPosition }) => {
           top: `${avatarPosition.y}%`,
         }}
       >
-        <img
-          src={player.avatar}
-          alt="Player Avatar"
-          className="player-avatar-image"
-        />
+        <img src="/assets/ayam ygy.png" alt="Avatar" className="avatar-image walking-avatar" />
+        <img src="/assets/bebek ygy.png" alt="Bebek" className="avatar-image walking-avatar" />
+        <img src="/assets/capi ygy.png" alt="Capi" className="avatar-image walking-avatar" />
+
       </div>
     </div>
   );
