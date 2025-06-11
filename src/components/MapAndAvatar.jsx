@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import '../styles/MapAndAvatar.css';
 
-const MapAndAvatar = ({ player, avatarPosition }) => {
+const MapAndAvatar = ({ player, avatarPosition, isWalking }) => {
   const [isWalking, setIsWalking] = useState(false);
 
   const getLocationImage = (location) => {
