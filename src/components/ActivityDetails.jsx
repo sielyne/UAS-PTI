@@ -1,43 +1,57 @@
+// components/ActivityDetails.jsx
 import React from 'react';
-import '../styles/ActivityDetails.css'; // Import CSS file
+import '../styles/ActivityDetails.css'; // Pastikan file CSS ini terhubung
 
 const ActivityDetails = ({ location, onActivity }) => {
-  const getActivitiesForLocation = (location) => {
-    const commonActivities = ['Work'];
-
-    switch (location) {
-      case 'Home':
-        return [...commonActivities, 'Eat', 'Sleep', 'Take a Bath'];
-      case 'Beach':
-        return [...commonActivities, 'Eat', 'Play', 'Buy Souvenir', 'Explore'];
-      case 'Lake':
-        return [...commonActivities, 'Eat', 'Play', 'Buy Souvenir', 'Explore'];
-      case 'Mountain':
-        return [...commonActivities, 'Eat', 'Play', 'Buy Souvenir', 'Explore'];
-      case 'Temple':
-        return [...commonActivities, 'Eat', 'Pray', 'Buy Souvenir', 'Explore'];
-      default:
-        return commonActivities;
+  const getActivitiesForLocation = (currentLocation) => {
+    if (currentLocation === 'MainMap') {
+      return (
+        <>
+          <h4 className="activity-details-title">Events:</h4> {/* Judul untuk bagian event */}
+          <p className="activity-link" onClick={() => onActivity('Go to Home')}>Go to Home</p>
+          <p className="activity-link" onClick={() => onActivity('Go to Temple')}>Go to Temple</p>
+          <p className="activity-link" onClick={() => onActivity('Go to Beach')}>Go to Beach</p>
+          <p className="activity-link" onClick={() => onActivity('Go to Lake')}>Go to Lake</p>
+          <p className="activity-link" onClick={() => onActivity('Go to Mountain')}>Go to Mountain</p>
+        </>
+      );
+    } else {
+      switch (currentLocation) {
+        case 'Home':
+          return ['Eat', 'Sleep', 'Take a Bath', 'Event'];
+        case 'Beach':
+          return ['Eat', 'Play', 'Buy Souvenir', 'Explore', 'Event'];
+        case 'Lake':
+          return ['Eat', 'Play', 'Buy Souvenir', 'Explore', 'Event'];
+        case 'Mountain':
+          return ['Eat', 'Play', 'Buy Souvenir', 'Explore', 'Event'];
+        case 'Temple':
+          return ['Eat', 'Pray', 'Buy Souvenir', 'Explore', 'Event'];
+        default:
+          return [];
+      }
     }
   };
-
-  const activities = getActivitiesForLocation(location);
 
   return (
     <div className="activity-details-container">
       <h3 className="activity-details-title">
-        Activities at {location}
+        {location === 'MainMap' ? 'Main Map Events' : `Activities at ${location}`}
       </h3>
-      <div className="activity-details-buttons">
-        {activities.map((activity) => (
-          <button
-            key={activity}
-            onClick={() => onActivity(activity)}
-            className="activity-details-button"
-          >
-            {activity}
-          </button>
-        ))}
+      <div className="activity-details-list">
+        {location === 'MainMap' ? (
+          getActivitiesForLocation(location)
+        ) : (
+          getActivitiesForLocation(location).map((activity) => (
+            <button
+              key={activity}
+              onClick={() => onActivity(activity)}
+              className="activity-details-button"
+            >
+              {activity}
+            </button>
+          ))
+        )}
       </div>
     </div>
   );
