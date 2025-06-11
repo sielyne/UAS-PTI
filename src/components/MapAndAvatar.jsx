@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import '../styles/MapAndAvatar.css';
 
 const MapAndAvatar = ({ player, avatarPosition }) => {
+  const [isWalking, setIsWalking] = useState(false);
+
+  // Fungsi untuk mengambil gambar lokasi
   const getLocationImage = (location) => {
     switch (location) {
       case 'Home': return '/assets/HomeMap.png';
@@ -14,8 +17,43 @@ const MapAndAvatar = ({ player, avatarPosition }) => {
     }
   };
 
+  useEffect(() => {
+    let keysPressed = {};
+
+    const handleKeyDown = (e) => {
+      keysPressed[e.key] = true;
+      if (
+        keysPressed["ArrowUp"] || keysPressed["ArrowDown"] ||
+        keysPressed["ArrowLeft"] || keysPressed["ArrowRight"] ||
+        keysPressed["w"] || keysPressed["a"] ||
+        keysPressed["s"] || keysPressed["d"]
+      ) {
+        setIsWalking(true);
+      }
+    };
+
+    const handleKeyUp = (e) => {
+      keysPressed[e.key] = false;
+      if (
+        !keysPressed["ArrowUp"] && !keysPressed["ArrowDown"] &&
+        !keysPressed["ArrowLeft"] && !keysPressed["ArrowRight"] &&
+        !keysPressed["w"] && !keysPressed["a"] &&
+        !keysPressed["s"] && !keysPressed["d"]
+      ) {
+        setIsWalking(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
   return (
-    // Tambahkan div ini sebagai wrapper yang akan diatur oleh GameScreen.css
     <div className="map-and-avatar-container">
       <img
         src={getLocationImage(player.location)}
@@ -30,10 +68,11 @@ const MapAndAvatar = ({ player, avatarPosition }) => {
           top: `${avatarPosition.y}%`,
         }}
       >
-        <img src="/assets/ayam ygy.png" alt="Avatar" className="avatar-image walking-avatar" />
-        <img src="/assets/bebek ygy.png" alt="Bebek" className="avatar-image walking-avatar" />
-        <img src="/assets/capi ygy.png" alt="Capi" className="avatar-image walking-avatar" />
-
+        <img
+          src={player.avatar}
+          alt="Player Avatar"
+          className={`player-avatar-image ${isWalking ? 'walking-avatar' : ''}`}
+        />
       </div>
     </div>
   );
