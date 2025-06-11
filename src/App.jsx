@@ -39,8 +39,6 @@ const App = () => {
       Beach: { x: [70, 90], y: [70, 90] },
       Temple: { x: [40, 60], y: [70, 90] }
     }
-    
-  console.log("Render App", player, avatarPosition, isWalking);
   };
 
   const locationEvents = {
