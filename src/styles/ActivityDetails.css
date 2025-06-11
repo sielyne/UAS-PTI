@@ -1,60 +1,177 @@
-/* styles/ActivityDetails.css */
+/* src/styles/ActivityDetails.css */
 
 .activity-details-container {
-  /* NO position: absolute/fixed HERE. It's managed by .game-right-sidebar now */
-  background-color: rgba(52, 73, 94, 0.95); /* Latar belakang gelap */
-  color: white; /* Warna teks putih untuk kontras */
-  padding: 1.5rem;
-  border-radius: 12px;
-  /* width: 100%; (Akan diatur oleh parentnya) */
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  max-height: none; /* Hilangkan batasan tinggi */
-  overflow-y: visible; /* Hilangkan scroll internal, biarkan parent sidebar yang scroll */
-  box-sizing: border-box;
+    background-color: rgba(44, 62, 80, 0.9); /* Latar belakang sidebar */
+    padding: 1rem; /* Kurangi padding agar tidak terlalu besar */
+    border-radius: 8px; /* Sudut membulat */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sedikit bayangan */
+    color: #ecf0f1; /* Warna teks umum */
+    margin-bottom: 1rem; /* Kurangi jarak dari Inventory di bawahnya */
+
+    /* PENTING: Jadikan flex container */
+    display: flex;
+    flex-direction: column;
+    flex: 1; /* Izinkan komponen ini untuk tumbuh mengisi ruang vertikal yang tersedia */
+    min-height: 0; /* PENTING: Untuk flex item yang memiliki konten scrollable */
 }
 
 .activity-details-title {
-  margin: 0 0 1rem 0;
-  text-align: center;
-  color: white; /* Pastikan judul tetap putih */
+    font-size: 1.3rem; /* Kurangi ukuran font judul */
+    color: #f39c12;
+    margin-bottom: 0.8rem; /* Kurangi margin bawah judul */
+    text-align: center;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    flex-shrink: 0; /* Pastikan judul tidak menyusut */
 }
 
-/* Mengganti nama kelas dari .activity-details-buttons menjadi .activity-details-list */
 .activity-details-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem; /* Jarak antar item (baik tombol maupun teks link) */
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Kurangi jarak antar opsi aktivitas */
+
+    /* PENTING: Jadikan bagian ini bisa di-scroll */
+    flex: 1; /* Izinkan daftar ini mengambil sisa ruang vertikal di dalam activity-details-container */
+    overflow-y: auto; /* Aktifkan scroll vertikal */
+    padding-right: 5px; /* Tambahkan padding agar scrollbar tidak menempel konten */
+
+    /* Styling scrollbar (opsional, untuk tampilan yang lebih baik) */
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: #f39c12 #2c3e50; /* Firefox: thumb track */
 }
 
-.activity-details-button {
-  padding: 0.8rem;
-  background-color: #3498db; /* Warna biru konsisten */
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  font-size: 0.9rem;
+/* Styling untuk setiap kontainer opsi aktivitas */
+.activity-option {
+    display: flex;
+    align-items: center;
+    background-color: rgba(52, 73, 94, 0.7);
+    padding: 6px 10px; /* Kurangi padding opsi aktivitas */
+    border-radius: 5px;
+    transition: background-color 0.2s ease;
 }
 
-.activity-details-button:hover {
-  background-color: #2980b9; /* Warna biru sedikit lebih gelap saat hover */
+.activity-option:hover {
+    background-color: rgba(52, 73, 94, 0.9);
 }
 
+/* Styling untuk tombol di dalam setiap opsi aktivitas */
+.activity-option button {
+    flex-grow: 1;
+    background-color: #3498db;
+    color: white;
+    padding: 8px 12px; /* Kurangi padding tombol */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem; /* Kurangi ukuran font tombol */
+    font-weight: bold;
+    text-transform: uppercase;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    letter-spacing: 0.5px;
+}
+
+.activity-option button:hover {
+    background-color: #2980b9;
+    transform: translateY(-1px); /* Kurangi efek terangkat */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4); /* Kurangi bayangan */
+}
+
+.activity-option button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Styling untuk info-icon (huruf 'i' di dalam lingkaran) */
+.activity-option .info-icon {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border-radius: 50%;
+    width: 20px; /* Kurangi ukuran lingkaran */
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.8rem; /* Kurangi ukuran font */
+    font-weight: bold;
+    margin-right: 8px; /* Kurangi jarak dari tombol */
+    cursor: help;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: background-color 0.2s ease;
+}
+
+.activity-option .info-icon:hover {
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Styling untuk tooltip (konten 'title' dari info-icon) */
+.activity-option .info-icon[title] {
+    position: relative;
+}
+
+.activity-option .info-icon[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 6px 10px; /* Kurangi padding tooltip */
+    border-radius: 5px;
+    font-size: 0.8rem; /* Kurangi ukuran font tooltip */
+    white-space: nowrap;
+    z-index: 1000;
+    margin-bottom: 8px; /* Kurangi jarak dari icon */
+    pointer-events: none;
+    opacity: 0;
+    animation: fadeInTooltip 0.2s forwards;
+}
+
+@keyframes fadeInTooltip {
+    from { opacity: 0; transform: translateX(-50%) translateY(0); }
+    to { opacity: 1; transform: translateX(-50%) translateY(-2px); }
+}
+
+/* Styling scrollbar untuk Webkit (Chrome, Safari, Edge) */
+.activity-details-list::-webkit-scrollbar {
+    width: 8px;
+}
+.activity-details-list::-webkit-scrollbar-track {
+    background: #2c3e50;
+    border-radius: 10px;
+}
+.activity-details-list::-webkit-scrollbar-thumb {
+    background: #f39c12;
+    border-radius: 10px;
+    border: 2px solid #2c3e50;
+}
+.activity-details-list::-webkit-scrollbar-thumb:hover {
+    background: #e67e22;
+}
+
+
+/* Styling untuk link di MainMap */
 .activity-link {
-  color: #3498db; /* Warna biru konsisten untuk teks link */
-  text-decoration: none; /* Hilangkan garis bawah default */
-  cursor: pointer;
-  padding: 0.8rem; /* Padding agar area klik lebih nyaman */
-  border-radius: 6px; /* Sudut sedikit membulat seperti tombol */
-  transition: background-color 0.3s ease, color 0.3s ease;
-  font-size: 0.9rem;
-  text-align: center; /* Teks di tengah */
-  font-weight: normal; /* Tetap normal atau bold sesuai preferensi */
-  display: block; /* Agar padding dan background bisa diaplikasikan */
+    background-color: rgba(62, 83, 104, 0.8);
+    padding: 8px 12px; /* Kurangi padding link */
+    border-radius: 5px;
+    margin-bottom: 6px; /* Kurangi margin bawah */
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    color: #ecf0f1;
+    font-size: 0.95rem; /* Kurangi ukuran font link */
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .activity-link:hover {
-  background-color: rgba(52, 152, 219, 0.1); /* Latar belakang biru transparan saat hover */
-  color: #2980b9; /* Warna teks biru sedikit lebih gelap saat hover */
+    background-color: rgba(72, 93, 114, 0.9);
+    color: #f39c12;
+}
+
+/* Styling Main Map Events title (dari GameScreen.css) agar konsisten */
+.game-right-sidebar .activity-details-title {
+    /* Aturan ini bertujuan untuk konsistensi, biarkan saja jika tidak ada konflik serius */
 }

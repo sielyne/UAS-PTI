@@ -1,0 +1,39 @@
+/* BeachActivities.css */
+.activity-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.info-icon {
+  display: inline-block;
+  background-color: #007BFF;
+  color: white;
+  font-weight: bold;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  border-radius: 50%;
+  cursor: pointer;
+  line-height: 20px;
+  font-size: 12px;
+  position: relative;
+}
+
+/* Tooltip shown on hover (default browser tooltip via title attribute) */
+/* If you want custom tooltip styling, let me know and I’ll provide it. */
+
+button {
+  padding: 8px 14px;
+  background-color: #ffbf00;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #e0a800;
+}

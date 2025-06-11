@@ -1,15 +1,14 @@
-body {
+/* Dalam index.css */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* Default font untuk seluruh aplikasi */
+html, body {
   margin: 0;
   padding: 0;
-  font-family: 'Arial', sans-serif;
+  font-family: 'Press Start 2P', cursive; /* Terapkan di sini */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #2c3e50; /* Fallback background */
-  color: white;
-  overflow: hidden; /* Penting: mencegah scrollbar global */
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  background-color: #2c3e50; /* Pastikan konsisten */
+  color: white; /* Default warna teks */
+  font-size: 16px; /* Ukuran font dasar untuk perhitungan rem */
 }

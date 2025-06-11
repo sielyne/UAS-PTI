@@ -1,9 +1,17 @@
-import React, { useState, useEffect } from 'react';
+// src/App.js
+
+import React, { useState, useEffect, useCallback } from 'react';
 import AvatarSelection from './components/AvatarSelection';
 import GameScreen from './components/GameScreen';
 import GameOverScreen from './components/GameOverScreen';
-import EventPopup from './components/activities/EventPopup';
-import './index.css'; // Import general styles
+import EventPopup from './components/activities/EventPopup'; // Pastikan path sudah benar
+import './index.css';
+
+const CONSUMABLE_FOOD_EFFECTS = {
+  'Daging': { hunger: 30, energy: 5 },
+  'Comfort Food': { hunger: 25, happiness: 10, energy: 5 },
+  'Freshwater Fish': { hunger: 35, happiness: 5 },
+};
 
 const App = () => {
   const [player, setPlayer] = useState({
@@ -41,7 +49,7 @@ const App = () => {
 
   const locationEvents = {
     Home: {
-      message: "You enjoy a cozy morning routine at home.", // Updated message
+      message: "You enjoy a cozy morning routine at home.",
       rewards: {
         happiness: 15,
         energy: 10,
@@ -50,7 +58,7 @@ const App = () => {
       activityRequired: true
     },
     Temple: {
-      message: "You pray at the temple and feel spiritually refreshed.", // Updated message
+      message: "You pray at the temple and feel spiritually refreshed.",
       rewards: {
         happiness: 25,
         energy: 15,
@@ -59,7 +67,7 @@ const App = () => {
       activityRequired: true
     },
     Beach: {
-      message: "You find a rare seashell on the beach.", // Updated message
+      message: "You find a rare seashell on the beach.",
       rewards: {
         happiness: 20,
         money: 300000,
@@ -68,7 +76,7 @@ const App = () => {
       activityRequired: true
     },
     Lake: {
-      message: "You catch a big fish while relaxing by the lake.", // Updated message
+      message: "You catch a big fish while relaxing by the lake.",
       rewards: {
         happiness: 18,
         hunger: 15,
@@ -77,7 +85,7 @@ const App = () => {
       activityRequired: true
     },
     Mountain: {
-      message: "You hike up the mountain and feel mentally clear.", // Updated message
+      message: "You hike up the mountain and feel mentally clear.",
       rewards: {
         happiness: 30,
         energy: -10,
@@ -87,7 +95,6 @@ const App = () => {
       activityRequired: true
     }
   };
-
 
   const selectAvatar = (avatarSrc) => {
     setPlayer(prevPlayer => ({ ...prevPlayer, avatar: avatarSrc }));
@@ -189,7 +196,7 @@ const App = () => {
     if (player.location === 'MainMap' && mapAreas.MainMap) {
       for (const [area, bounds] of Object.entries(mapAreas.MainMap)) {
         if (newX >= bounds.x[0] && newX <= bounds.x[1] &&
-          newY >= bounds.y[0] && newY <= bounds.y[1]) {
+            newY >= bounds.y[0] && newY <= bounds.y[1]) {
           setPlayer(prevPlayer => ({
             ...prevPlayer,
             location: area,
@@ -198,6 +205,8 @@ const App = () => {
             happiness: Math.min(100, prevPlayer.happiness + 5),
           }));
           setAvatarPosition({ x: 50, y: 50 }); // Reset position in new map
+          
+          triggerLocationEvent(area); 
           return true;
         }
       }
@@ -205,7 +214,11 @@ const App = () => {
     return false;
   };
 
-  const handleMove = (direction) => {
+  const handleMove = useCallback((direction) => {
+    if (gameOver || !gameStarted || showEventPopup) {
+      return; 
+    }
+
     if (player.energy < 5) {
       alert("You don't have enough energy to move!");
       return;
@@ -239,7 +252,7 @@ const App = () => {
         energy: Math.max(0, prevPlayer.energy - 1)
       }));
     }
-  };
+  }, [gameOver, gameStarted, showEventPopup, player.energy, avatarPosition, checkAreaTransition, setAvatarPosition, setPlayer]);
 
   const handleBackToMainMap = () => {
     setPlayer(prevPlayer => ({ ...prevPlayer, location: 'MainMap' }));
@@ -258,58 +271,81 @@ const App = () => {
     }
   };
 
-  const applyEventRewards = () => {
+  // src/App.js - di dalam fungsi applyEventRewards
+
+const applyEventRewards = () => {
+    console.log("App.js: Fungsi applyEventRewards dipanggil.");
+    console.log("App.js: currentEvent sebelum proses reward:", currentEvent); // LOG BARU
+
     if (currentEvent && currentEvent.rewards) {
-      const rewards = currentEvent.rewards;
-      let rewardMessage = `Event completed at ${currentEvent.location}!\n\nRewards received:\n`;
+        console.log("App.js: currentEvent dan rewards valid."); // LOG BARU
+        const rewards = currentEvent.rewards;
+        let rewardMessage = `Event completed at ${currentEvent.location}!\n\nRewards received:\n`;
 
-      setPlayer(prevPlayer => {
-        let newPlayer = { ...prevPlayer };
+        setPlayer(prevPlayer => {
+            console.log("App.js: Inside setPlayer callback. prevPlayer state:", prevPlayer);
+            console.log("App.js: Rewards untuk event ini:", rewards);
 
-        if (rewards.happiness) {
-          newPlayer.happiness = Math.min(100, Math.max(0, prevPlayer.happiness + rewards.happiness));
-          rewardMessage += `• Happiness: ${rewards.happiness > 0 ? '+' : ''}${rewards.happiness}\n`;
-        }
-        if (rewards.energy) {
-          newPlayer.energy = Math.min(100, Math.max(0, prevPlayer.energy + rewards.energy));
-          rewardMessage += `• Energy: ${rewards.energy > 0 ? '+' : ''}${rewards.energy}\n`;
-        }
-        if (rewards.hunger) {
-          newPlayer.hunger = Math.min(100, Math.max(0, prevPlayer.hunger + rewards.hunger));
-          rewardMessage += `• Hunger: ${rewards.hunger > 0 ? '+' : ''}${rewards.hunger}\n`;
-        }
-        if (rewards.hygiene) {
-          newPlayer.hygiene = Math.min(100, Math.max(0, prevPlayer.hygiene + rewards.hygiene));
-          rewardMessage += `• Hygiene: ${rewards.hygiene > 0 ? '+' : ''}${rewards.hygiene}\n`;
-        }
-        if (rewards.money) {
-          newPlayer.money = Math.max(0, prevPlayer.money + rewards.money);
-          rewardMessage += `• Money: +Rp${rewards.money.toLocaleString()}\n`;
-        }
+            let newPlayer = { ...prevPlayer };
 
-        if (rewards.inventory) {
-          newPlayer.inventory = { ...prevPlayer.inventory };
-          for (const [itemName, itemData] of Object.entries(rewards.inventory)) {
-            if (newPlayer.inventory[itemName]) {
-              newPlayer.inventory[itemName].stock += itemData.stock;
-            } else {
-              newPlayer.inventory[itemName] = { ...itemData };
+            if (rewards.happiness) {
+                newPlayer.happiness = Math.min(100, Math.max(0, prevPlayer.happiness + rewards.happiness));
+                rewardMessage += `• Happiness: <span class="math-inline">\{rewards\.happiness \> 0 ? '\+' \: ''\}</span>{rewards.happiness}\n`;
             }
-            rewardMessage += `• ${itemName}: +${itemData.stock}\n`;
-          }
-        }
+            if (rewards.energy) {
+                newPlayer.energy = Math.min(100, Math.max(0, prevPlayer.energy + rewards.energy));
+                rewardMessage += `• Energy: <span class="math-inline">\{rewards\.energy \> 0 ? '\+' \: ''\}</span>{rewards.energy}\n`;
+            }
+            if (rewards.hunger) {
+                newPlayer.hunger = Math.min(100, Math.max(0, prevPlayer.hunger + rewards.hunger));
+                rewardMessage += `• Hunger: <span class="math-inline">\{rewards\.hunger \> 0 ? '\+' \: ''\}</span>{rewards.hunger}\n`;
+            }
+            if (rewards.hygiene) {
+                newPlayer.hygiene = Math.min(100, Math.max(0, prevPlayer.hygiene + rewards.hygiene));
+                rewardMessage += `• Hygiene: <span class="math-inline">\{rewards\.hygiene \> 0 ? '\+' \: ''\}</span>{rewards.hygiene}\n`;
+            }
+            if (rewards.money) {
+                newPlayer.money = Math.max(0, prevPlayer.money + rewards.money);
+                rewardMessage += `• Money: +Rp${rewards.money.toLocaleString()}\n`;
+            }
 
-        return newPlayer;
-      });
+            if (rewards.inventory) {
+                console.log("App.js: Memproses reward inventory. Rewards:", rewards.inventory); // LOG BARU
+                newPlayer.inventory = { ...prevPlayer.inventory };
+                for (const [itemName, itemData] of Object.entries(rewards.inventory)) {
+                    console.log(`App.js: Memproses item: ${itemName}, data:`, itemData); // LOG BARU
+                    if (newPlayer.inventory[itemName]) {
+                        console.log(`App.js: Item ${itemName} sudah ada, stok sebelumnya: ${newPlayer.inventory[itemName].stock}`); // LOG BARU
+                        newPlayer.inventory[itemName] = {
+                            ...newPlayer.inventory[itemName],
+                            stock: newPlayer.inventory[itemName].stock + itemData.stock
+                        };
+                        console.log(`App.js: Item ${itemName} stok baru: ${newPlayer.inventory[itemName].stock}`); // LOG BARU
+                    } else {
+                        console.log(`App.js: Item ${itemName} baru, ditambahkan.`); // LOG BARU
+                        newPlayer.inventory[itemName] = { ...itemData };
+                    }
+                    rewardMessage += `• <span class="math-inline">\{itemName\}\: \+</span>{itemData.stock}\n`;
+                }
+                console.log("App.js: Inventory setelah update (dalam callback setPlayer):", newPlayer.inventory); // LOG BARU
+            }
 
-      setTimeout(() => {
+            console.log("App.js: Calculated newPlayer state (before returning):", newPlayer);
+            return newPlayer;
+        });
+
         alert(rewardMessage);
-      }, 100);
+
+    } else {
+        console.log("App.js: currentEvent atau currentEvent.rewards tidak valid. currentEvent:", currentEvent);
+        alert("Error: Event data corrupted or not found for rewards!"); // Beri tahu pemain jika ada masalah data
     }
 
+    console.log("App.js: Menutup popup event dan mereset currentEvent..."); // LOG BARU
     setShowEventPopup(false);
     setCurrentEvent(null);
-  };
+    console.log("App.js: Event popup ditutup dan currentEvent di-reset.");
+};
 
   const handleActivity = (activity) => {
     if (activity.startsWith('Go to ')) {
@@ -331,7 +367,7 @@ const App = () => {
     switch (activity) {
       case 'Event':
         if (currentEvent && currentEvent.location === player.location && currentEvent.activityRequired) {
-          applyEventRewards();
+          applyEventRewards(); 
         } else {
           alert("No active event requires this activity at your current location, or the event is already completed!");
         }
@@ -339,19 +375,54 @@ const App = () => {
 
       case 'Eat':
         if (player.location === 'Home') {
-          if (player.inventory['Daging']?.stock > 0) {
-            setPlayer(prevPlayer => ({
-              ...prevPlayer,
-              hunger: Math.min(100, prevPlayer.hunger + 30),
-              energy: Math.min(100, prevPlayer.energy + 5),
-              inventory: {
-                ...prevPlayer.inventory,
-                'Daging': { ...prevPlayer.inventory['Daging'], stock: prevPlayer.inventory['Daging'].stock - 1 }
+          const availableFoodItems = Object.keys(player.inventory).filter(itemName =>
+            player.inventory[itemName].type === 'food' && player.inventory[itemName].stock > 0 && CONSUMABLE_FOOD_EFFECTS[itemName]
+          );
+
+          if (availableFoodItems.length > 0) {
+            const itemToEat = availableFoodItems[0];
+            const effects = CONSUMABLE_FOOD_EFFECTS[itemToEat];
+
+            setPlayer(prevPlayer => {
+              let newPlayer = { ...prevPlayer };
+
+              // --- PASTIKAN JUGA UPDATE INVENTORY DI SINI BENAR ---
+              newPlayer.inventory = {
+                ...newPlayer.inventory,
+                [itemToEat]: {
+                  ...newPlayer.inventory[itemToEat], // Salin properti yang ada
+                  stock: newPlayer.inventory[itemToEat].stock - 1 // Kurangi stok
+                }
+              };
+              if (newPlayer.inventory[itemToEat].stock <= 0) {
+                const { [itemToEat]: _, ...restInventory } = newPlayer.inventory;
+                newPlayer.inventory = restInventory;
               }
-            }));
-            alert("Anda makan Daging masakan rumah. +30 Lapar, +5 Energi, -1 Daging.");
+              // --- END UPDATE INVENTORY DI SINI BENAR ---
+
+              let msg = `Anda makan ${itemToEat}. `;
+              if (effects.hunger) {
+                newPlayer.hunger = Math.min(100, Math.max(0, prevPlayer.hunger + effects.hunger));
+                msg += `${effects.hunger > 0 ? '+' : ''}${effects.hunger} Lapar, `;
+              }
+              if (effects.energy) {
+                newPlayer.energy = Math.min(100, Math.max(0, prevPlayer.energy + effects.energy));
+                msg += `${effects.energy > 0 ? '+' : ''}${effects.energy} Energi, `;
+              }
+              if (effects.happiness) {
+                newPlayer.happiness = Math.min(100, Math.max(0, prevPlayer.happiness + effects.happiness));
+                msg += `${effects.happiness > 0 ? '+' : ''}${effects.happiness} Kebahagiaan, `;
+              }
+              if (effects.hygiene) {
+                newPlayer.hygiene = Math.min(100, Math.max(0, prevPlayer.hygiene + effects.hygiene));
+                msg += `${effects.hygiene > 0 ? '+' : ''}${effects.hygiene} Kebersihan, `;
+              }
+              msg += `-1 ${itemToEat}.`;
+              alert(msg);
+              return newPlayer;
+            });
           } else {
-            alert("Anda tidak punya Daging untuk dimakan di rumah!");
+            alert("Anda tidak punya makanan untuk dimakan di rumah!");
           }
         } else {
           if (player.money >= 100000) {
@@ -433,6 +504,7 @@ const App = () => {
               ...prevPlayer,
               money: prevPlayer.money - 200000,
               happiness: Math.min(100, prevPlayer.happiness + 20),
+              // --- PASTIKAN JUGA UPDATE INVENTORY DI SINI BENAR ---
               inventory: {
                 ...prevPlayer.inventory,
                 'Souvenir': {
@@ -440,6 +512,7 @@ const App = () => {
                   stock: (prevPlayer.inventory['Souvenir']?.stock || 0) + 1
                 }
               }
+              // --- END UPDATE INVENTORY DI SINI BENAR ---
             }));
             alert(`Anda membeli suvenir di ${player.location}. -Rp200.000, +20 Kebahagiaan, +1 Suvenir.`);
           } else {
@@ -482,6 +555,51 @@ const App = () => {
     }
   };
 
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (!gameStarted || gameOver || showEventPopup) {
+        return; 
+      }
+
+      let direction = null;
+      switch (event.key) {
+        case 'ArrowUp':
+        case 'w':
+        case 'W':
+          direction = 'up';
+          break;
+        case 'ArrowDown':
+        case 's':
+        case 'S':
+          direction = 'down';
+          break;
+        case 'ArrowLeft':
+        case 'a':
+        case 'A':
+          direction = 'left';
+          break;
+        case 'ArrowRight':
+        case 'd':
+        case 'D':
+          direction = 'right';
+          break;
+        default:
+          break;
+      }
+
+      if (direction) {
+        event.preventDefault(); 
+        handleMove(direction);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [gameStarted, gameOver, showEventPopup, handleMove]);
+
   return (
     <div className="app-container">
       {!gameStarted && (
@@ -505,7 +623,7 @@ const App = () => {
         <EventPopup
           event={currentEvent}
           onClose={() => setShowEventPopup(false)}
-          onAttemptActivity={applyEventRewards}
+          onAttemptActivity={applyEventRewards} 
         />
       )}
     </div>

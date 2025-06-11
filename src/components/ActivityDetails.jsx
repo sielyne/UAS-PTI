@@ -1,35 +1,43 @@
 // components/ActivityDetails.jsx
 import React from 'react';
-import '../styles/ActivityDetails.css'; // Pastikan file CSS ini terhubung
+import '../styles/ActivityDetails.css';
+
+// Import semua komponen aktivitas per lokasi yang sudah Anda buat
+import HomeActivities from './activities/HomeActivities';
+import BeachActivities from './activities/BeachActivities';
+import LakeActivities from './activities/LakeActivities';
+import MountainActivities from './activities/MountainActivities';
+import TempleActivities from './activities/TempleActivities';
+// import MainMapActivities (jika Anda membuat komponen terpisah untuk ini, saat ini main map sudah di handle langsung)
 
 const ActivityDetails = ({ location, onActivity }) => {
-  const getActivitiesForLocation = (currentLocation) => {
-    if (currentLocation === 'MainMap') {
-      return (
-        <>
-          <h4 className="activity-details-title">Events:</h4> {/* Judul untuk bagian event */}
-          <p className="activity-link" onClick={() => onActivity('Go to Home')}>Go to Home</p>
-          <p className="activity-link" onClick={() => onActivity('Go to Temple')}>Go to Temple</p>
-          <p className="activity-link" onClick={() => onActivity('Go to Beach')}>Go to Beach</p>
-          <p className="activity-link" onClick={() => onActivity('Go to Lake')}>Go to Lake</p>
-          <p className="activity-link" onClick={() => onActivity('Go to Mountain')}>Go to Mountain</p>
-        </>
-      );
-    } else {
-      switch (currentLocation) {
-        case 'Home':
-          return ['Eat', 'Sleep', 'Take a Bath', 'Event'];
-        case 'Beach':
-          return ['Eat', 'Play', 'Buy Souvenir', 'Explore', 'Event'];
-        case 'Lake':
-          return ['Eat', 'Play', 'Buy Souvenir', 'Explore', 'Event'];
-        case 'Mountain':
-          return ['Eat', 'Play', 'Buy Souvenir', 'Explore', 'Event'];
-        case 'Temple':
-          return ['Eat', 'Pray', 'Buy Souvenir', 'Explore', 'Event'];
-        default:
-          return [];
-      }
+  // Fungsi ini sekarang akan mengembalikan KOMPONEN React, bukan array string
+  const renderActivitiesForLocation = (currentLocation) => {
+    switch (currentLocation) {
+      case 'MainMap':
+        // Jika MainMap, render daftar link event (seperti yang sudah Anda lakukan)
+        return (
+          <>
+            <h4 className="activity-details-title">Events:</h4>
+            <p className="activity-link" onClick={() => onActivity('Go to Home')}>Go to Home</p>
+            <p className="activity-link" onClick={() => onActivity('Go to Temple')}>Go to Temple</p>
+            <p className="activity-link" onClick={() => onActivity('Go to Beach')}>Go to Beach</p>
+            <p className="activity-link" onClick={() => onActivity('Go to Lake')}>Go to Lake</p>
+            <p className="activity-link" onClick={() => onActivity('Go to Mountain')}>Go to Mountain</p>
+          </>
+        );
+      case 'Home':
+        return <HomeActivities onActivity={onActivity} />;
+      case 'Beach':
+        return <BeachActivities onActivity={onActivity} />;
+      case 'Lake':
+        return <LakeActivities onActivity={onActivity} />;
+      case 'Mountain':
+        return <MountainActivities onActivity={onActivity} />;
+      case 'Temple':
+        return <TempleActivities onActivity={onActivity} />;
+      default:
+        return <p>No activities available for this location.</p>;
     }
   };
 
@@ -39,19 +47,7 @@ const ActivityDetails = ({ location, onActivity }) => {
         {location === 'MainMap' ? 'Main Map Events' : `Activities at ${location}`}
       </h3>
       <div className="activity-details-list">
-        {location === 'MainMap' ? (
-          getActivitiesForLocation(location)
-        ) : (
-          getActivitiesForLocation(location).map((activity) => (
-            <button
-              key={activity}
-              onClick={() => onActivity(activity)}
-              className="activity-details-button"
-            >
-              {activity}
-            </button>
-          ))
-        )}
+        {renderActivitiesForLocation(location)} {/* Panggil fungsi render yang sekarang mengembalikan komponen */}
       </div>
     </div>
   );

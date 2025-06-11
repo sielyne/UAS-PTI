@@ -1,69 +1,108 @@
-/* Dalam GameScreen.css */
+/* Dalam components/GameScreen.css */
+
+/* src/styles/GameScreen.css */
+
+.game-main-area {
+  display: grid;
+  grid-template-columns: 1fr 300px; /* Misal lebar sidebar 300px */
+  /* Pastikan ini mengisi tinggi yang tersisa dari parent-nya */
+  /* Jika parent-nya game-screen-container, dan itu 100vh, ini akan berfungsi */
+  height: 100%; /* PENTING: agar grid child bisa mengambil tinggi penuh */
+  overflow: hidden;
+}
 
 .game-screen-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100vh; /* PENTING: ini agar game-main-area punya tinggi yang pasti */
   width: 100vw;
-  background-color: #2c3e50;
-  font-family: Arial, sans-serif;
+  background-color: rgba(52, 73, 94, 0.1);
   overflow: hidden;
 }
 
-/* Status Bar */
+/* ... status-bar-container ... */
+
+/* ... game-map-column ... */
+
+/* ... game-overlay-controls ... */
+
+.game-right-sidebar {
+  grid-column: 2;
+  display: flex;
+  flex-direction: column; /* Ini penting agar anak-anaknya diatur secara vertikal */
+  gap: 1.5rem; /* Jarak antara Activity dan Inventory */
+  background-color: rgba(44, 62, 80, 0.9);
+  padding: 1.5rem;
+  box-shadow: -4px 0 10px rgba(0,0,0,0.4);
+  z-index: 60;
+
+  height: 100%; /* PENTING: Ini agar sidebar mengisi tinggi grid cell-nya */
+  /* HAPUS atau KOMENTARI BARIS INI (jika masih ada): */
+  /* max-height: 100%; */
+  /* overflow-y: auto; */
+
+  box-sizing: border-box;
+}
+
+/* ... media queries ... */
+/* --- Status Bar (Top) --- */
 .status-bar-container {
   flex-shrink: 0;
-  background-color: #34495e;
+  /* Pastikan Anda menggunakan nilai rgba() yang valid */
+  background-color: rgba(52, 73, 94, 0.7); /* Ini harusnya berfungsi */
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
   z-index: 100;
   padding: 1rem;
+  color: white; /* Penting agar teks di dalamnya tetap terlihat */
 }
 
-/* Main Game Area (Grid: Map Column | Sidebar Column) */
-.game-main-area {
-  flex-grow: 1;
-  display: grid;
-  /* Kolom pertama (map) akan fleksibel, kolom kedua (sidebar) tetap 300px */
-  grid-template-columns: 1fr 300px;
-  overflow: hidden;
-  position: relative; /* Penting untuk overlay controls */
-}
+/* --- Main Game Area (Grid: Map Column | Sidebar Column) --- */
 
-/* --- KUNCI UTAMA: Penyesuaian `game-map-column` --- */
+/* --- Kolom Kiri: Map dan Overlay Controls --- */
 .game-map-column {
-  grid-column: 1;
+  grid-column: 1; /* Menempatkan di kolom Grid pertama */
   position: relative; /* Penting untuk absolute positioning joystick/button */
   overflow: hidden; /* Mencegah scroll jika ada elemen yang meluap */
 
-  /* Gunakan Flexbox untuk memusatkan dan mengelola konten map */
+  /* Gunakan Flexbox untuk memusatkan dan mengelola konten map di dalamnya */
   display: flex;
   justify-content: center; /* Memusatkan secara horizontal */
   align-items: center; /* Memusatkan secara vertikal */
-  background-color: #1a2a3a; /* Latar belakang agar terlihat area kosong */
+  background-color: #1a2a3a; /* Latar belakang agar terlihat area kosong jika ada letterboxing */
 
-  /* Opsional: Batasi lebar maksimum kolom map */
-  /* Ini akan mencegah map terlalu melebar dan menyebabkan letterboxing parah */
-  /* Sesuaikan nilai ini. Misal, jika map Anda 1200x800, max-width 1200px bisa dicoba */
-  max-width: 1300px; /* Contoh: Batasi lebar maksimum kolom map */
-  margin: 0 auto; /* Pusatkan kolom map jika ada sisa ruang di game-main-area */
-  
-  /* Jika Anda punya rasio aspek pasti untuk gambar map (misal 1.5:1 atau 4:3),
-     bisa gunakan padding-bottom trick untuk menjaga rasio aspek parent container.
-     Ini akan membuat map lebih mengisi ruang.
-     Hanya jika Anda tahu rasio aspek gambar map Anda dan ingin menjaganya.
-     Kalau tidak, biarkan Flexbox dan max-width yang bekerja. */
+  /* KUNCI UTAMA UNTUK UKURAN MAP: */
+  /* Kita akan mencoba membuat kontainer map mengisi hampir seluruh ruang yang tersedia */
+  width: 100%; /* Mengisi lebar kolom grid 1fr */
+  height: 100%; /* Mengisi tinggi yang tersedia dari game-main-area */
+
+  /* PENTING: Coba hidupkan salah satu dari ini setelah mencoba kode di atas */
+  /* Opsi A: Atur aspect-ratio jika Anda tahu rasio gambar map Anda */
+  /* Contoh: Jika gambar map Anda 1.5x lebih lebar dari tingginya (rasio 3:2) */
+  /* aspect-ratio: 3 / 2; */
+
+  /* Opsi B: Batasi max-width dan max-height untuk mengontrol rasio aspek kontainer */
+  /* Sesuaikan nilai ini sesuai dengan rasio gambar map Anda.
+     Misal, jika gambar Anda 1200px lebar, 800px tinggi (rasio 1.5) */
+  /* max-width: 1200px; */
+  /* max-height: 800px; */
+
+  /* Opsi C: Kombinasi, batasi tinggi untuk map yang "kotak" di layar lebar */
+  /* max-height: 90vh; */ /* Coba batasi tinggi maksimum agar map tidak terlalu memanjang vertikal */
+  /* max-width: 100%; */ /* Biarkan dia mengisi lebar yang tersedia */
+
+  margin: auto; /* Pusatkan kolom map di dalam grid cell-nya */
 }
 
 /* Overlays: Joystick & Back Button */
 .game-overlay-controls {
-  position: absolute;
-  bottom: 1.5rem; /* Sesuaikan jarak dari bawah */
-  left: 1.5rem;  /* Sesuaikan jarak dari kiri */
-  z-index: 50;
+  position: absolute; /* Diposisikan relatif terhadap .game-map-column */
+  bottom: 1.5rem; /* Jarak dari bawah game-map-column */
+  left: 1.5rem;  /* Jarak dari kiri game-map-column */
+  z-index: 50; /* Di atas map, di bawah sidebar */
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem; /* Sedikit lebih rapat */
-  align-items: flex-start;
+  flex-direction: column; /* Stack joystick di atas tombol */
+  gap: 0.75rem; /* Jarak antara joystick dan tombol */
+  align-items: flex-start; /* Elemen di rata kiri */
 }
 
 .back-to-main-map-button {
@@ -82,48 +121,42 @@
   background-color: #c0392b;
 }
 
-/* Right Column: Sidebar */
-.game-right-sidebar {
-  grid-column: 2;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  background-color: rgba(44, 62, 80, 0.9);
-  padding: 1.5rem;
-  box-shadow: -4px 0 10px rgba(0,0,0,0.4);
-  z-index: 60;
-  overflow-y: auto;
-  box-sizing: border-box;
-}
+/* Right Column: Sidebar for Activities and Inventory */
+/* src/styles/GameScreen.css */
 
+
+/* ... sisa kode GameScreen.css ... */
 /* --- Responsive Adjustments --- */
 @media (max-width: 1024px) {
   .game-screen-container {
-    height: auto;
-    overflow-y: auto;
+    height: auto; /* Izinkan container utama melebihi 100vh */
+    overflow-y: auto; /* Izinkan scrolling pada halaman utama */
   }
 
   .game-main-area {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto; /* Map dan sidebar di baris terpisah */
-    overflow: visible;
+    grid-template-columns: 1fr; /* Di layar kecil, sidebar di bawah map */
+    grid-template-rows: auto auto; /* Map di baris pertama, sidebar di baris kedua */
+    overflow: visible; /* Izinkan konten meluap untuk memicu scroll halaman */
   }
 
   .game-map-column {
-    grid-row: 1;
-    max-width: none; /* Hilangkan batasan max-width di sini */
-    height: 60vh; /* Tinggi yang fleksibel untuk map di layar kecil */
+    grid-row: 1; /* Map di baris pertama */
+    max-width: none; /* Hilangkan batasan max-width di sini untuk responsivitas */
+    max-height: none; /* Hilangkan batasan max-height */
+    height: 60vh; /* Tinggi fleksibel untuk map di layar kecil */
     min-height: 400px; /* Minimal tinggi map agar tidak terlalu kecil */
-    margin: 0; /* Hapus margin auto */
+    margin: 0; /* Hapus margin auto, biarkan mengisi penuh */
+    /* Pastikan aspect-ratio dinonaktifkan di sini jika diaktifkan di desktop */
+    /* aspect-ratio: unset; */
   }
 
+  @media (max-width: 1024px) {
   .game-right-sidebar {
-    grid-row: 2;
-    width: 100%;
-    max-width: none;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-    border-top: 1px solid #34495e;
+    /* Saat di layar kecil, sidebar di bawah map, jadi tingginya tidak lagi fix */
+    max-height: none; /* Hilangkan batasan tinggi agar konten bisa memanjang */
+    overflow-y: visible; /* Biarkan halaman utama yang scroll */
   }
+}
 
   .game-overlay-controls {
     bottom: 1rem;

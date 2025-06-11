@@ -13,7 +13,7 @@ const MapAndAvatar = ({ player, avatarPosition }) => {
       case 'Beach': return '/assets/BeachMap.png';
       case 'Temple': return '/assets/TempleMap.png';
       case 'MainMap':
-      default: return '/assets/MainMap.jpg';
+      default: return '/assets/mainMap.jpg';
     }
   };
 
