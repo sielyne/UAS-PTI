@@ -4,6 +4,7 @@ import MapAndAvatar from './MapAndAvatar';
 import Joystick from './Joystick';
 import ActivityDetails from './ActivityDetails';
 import Inventory from './Inventory';
+import EventPopup from './activities/EventPopup';
 import '../styles/GameScreen.css';
 
 const GameScreen = ({
