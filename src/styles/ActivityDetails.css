@@ -1,7 +1,9 @@
+/* styles/ActivityDetails.css */
+
 .activity-details-container {
   /* NO position: absolute/fixed HERE. It's managed by .game-right-sidebar now */
-  background-color: rgba(52, 73, 94, 0.95); /* Keep styling */
-  color: white;
+  background-color: rgba(52, 73, 94, 0.95); /* Latar belakang gelap */
+  color: white; /* Warna teks putih untuk kontras */
   padding: 1.5rem;
   border-radius: 12px;
   /* width: 100%; (Akan diatur oleh parentnya) */
@@ -14,17 +16,19 @@
 .activity-details-title {
   margin: 0 0 1rem 0;
   text-align: center;
+  color: white; /* Pastikan judul tetap putih */
 }
 
-.activity-details-buttons {
+/* Mengganti nama kelas dari .activity-details-buttons menjadi .activity-details-list */
+.activity-details-list {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.5rem; /* Jarak antar item (baik tombol maupun teks link) */
 }
 
 .activity-details-button {
   padding: 0.8rem;
-  background-color: #3498db;
+  background-color: #3498db; /* Warna biru konsisten */
   color: white;
   border: none;
   border-radius: 6px;
@@ -34,5 +38,23 @@
 }
 
 .activity-details-button:hover {
-  background-color: #2980b9;
+  background-color: #2980b9; /* Warna biru sedikit lebih gelap saat hover */
+}
+
+.activity-link {
+  color: #3498db; /* Warna biru konsisten untuk teks link */
+  text-decoration: none; /* Hilangkan garis bawah default */
+  cursor: pointer;
+  padding: 0.8rem; /* Padding agar area klik lebih nyaman */
+  border-radius: 6px; /* Sudut sedikit membulat seperti tombol */
+  transition: background-color 0.3s ease, color 0.3s ease;
+  font-size: 0.9rem;
+  text-align: center; /* Teks di tengah */
+  font-weight: normal; /* Tetap normal atau bold sesuai preferensi */
+  display: block; /* Agar padding dan background bisa diaplikasikan */
+}
+
+.activity-link:hover {
+  background-color: rgba(52, 152, 219, 0.1); /* Latar belakang biru transparan saat hover */
+  color: #2980b9; /* Warna teks biru sedikit lebih gelap saat hover */
 }
