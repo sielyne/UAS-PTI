@@ -1,24 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import gmvrCapy from '/assets/gmvr_capy.gif';
-import gmvrDuck from '/assets/gmvr_duck.gif';
-import gmvrChick from '/assets/gmvr_chick.gif';
+import React from 'react';
+import '../styles/GameOverScreen.css'; // Import CSS file
 
 const GameOverScreen = ({ player, onRestart }) => {
-  const [avatarKey, setAvatarKey] = useState('');
-
-  useEffect(() => {
-    if (player.avatar.includes('ayam')) setAvatarKey('chick');
-    else if (player.avatar.includes('bebek')) setAvatarKey('duck');
-    else if (player.avatar.includes('capi')) setAvatarKey('capy');
-  }, [player.avatar]);
-
   return (
-    <div id="game-over-screen" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <img src={gmvrCapy} alt="Game Over Capy" style={{ display: avatarKey === 'capy' ? 'block' : 'none' }} />
-      <img src={gmvrDuck} alt="Game Over Duck" style={{ display: avatarKey === 'duck' ? 'block' : 'none' }} />
-      <img src={gmvrChick} alt="Game Over Chick" style={{ display: avatarKey === 'chick' ? 'block' : 'none' }} />
-      <h2>Game Over</h2>
-      <button onClick={onRestart}>Restart Game</button>
+    <div className="game-over-container">
+      <h1 className="game-over-title">Game Over!</h1>
+      <p className="game-over-message">
+        {player.name}, your journey has ended.
+      </p>
+      <p className="final-money">
+        Final Money: Rp{player.money.toLocaleString()}
+      </p>
+      <button
+        onClick={onRestart}
+        className="play-again-button"
+      >
+        Play Again
+      </button>
     </div>
   );
 };

@@ -1,178 +1,166 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-#game-container {
-  display: flex;
-  justify-content: center;
-  padding: 20px;
+/* FIX: Pastikan isi tampil di atas overlay */
+.avatar-selection-container > * {
+  position: relative;
+  z-index: 1;
 }
 
-#avatar-selection {
+.avatar-selection-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  height: 100vh;
+  background: url('/assets/1.jpg') no-repeat center center;
+  background-size: cover;
+  color: white;
+  font-family: 'Press Start 2P', cursive;
+  overflow: hidden;
+  padding: 2vh 5vw;
+  position: relative;
+  z-index: 0;
+  box-sizing: border-box;
+}
+
+.avatar-selection-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3); /* 0.5 = 50% redup, bisa ubah ke 0.6 atau 0.7 */
+  z-index: 0;
+  backdrop-filter: blur(1px); /* Tambahkan ini untuk efek blur */
+}
+
+.avatar-selection-title {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  text-align: center;
+  margin: 0;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+.player-name-input-group {
+  width: 100%;
+  max-width: 400px;
   text-align: center;
 }
 
-#avatar-display-container {
+.player-name-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.player-name-input {
+  width: 100%;
+  padding: 0.7rem;
+  font-size: 1rem;
+  border-radius: 10px;
+  border: 2px solid #3498db;
+  text-align: center;
+  background-color: #dfe6e9;
+  color: #2c3e50;
+  font-family: inherit;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.avatar-choose-section {
+  text-align: center;
+  width: 100%;
+}
+
+.avatar-choose-title {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.avatar-list {
   display: flex;
-  align-items: center;
+  gap: 2rem;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 15px;
+  flex-wrap: wrap;
 }
 
-.avatar-img {
-  max-width: 200px;
-  max-height: 200px;
-}
-
-#input-section {
+.avatar-item {
+  cursor: pointer;
+  padding: 1rem;
+  border: 3px solid transparent;
+  border-radius: 15px;
+  background-color: rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  align-items: center;
+  width: 110px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  transform: scale(1);
 }
 
+.avatar-item:hover {
+  transform: scale(1.08);
+  border-color: #74b9ff;
+}
 
-body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background-image: url("/assets/1.jpg");
-    background-size: cover;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background-position: center;
-    background-attachment: fixed;
-    justify-content: center;
-    align-items: center;
+.avatar-item.selected {
+  border-color: #00cec9;
+  transform: scale(1.1);
+  background-color: rgba(0, 206, 201, 0.1);
+}
+
+.avatar-image {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.avatar-name {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.start-game-button {
+  padding: 1rem 2rem;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  color: white;
+  background-color: #00b894;
+  cursor: pointer;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.3s ease, transform 0.2s;
+}
+
+.start-game-button:disabled {
+  background-color: #636e72;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.start-game-button:not(:disabled):hover {
+  background-color: #019875;
+  transform: scale(1.05);
+}
+
+/* Responsiveness */
+@media (max-height: 700px), (max-width: 600px) {
+  .avatar-selection-container {
+    overflow-y: auto;
+    height: auto;
+    padding: 2rem 1rem;
+  }
+
+  .avatar-item {
+    width: 90px;
+  }
+
+  .avatar-image {
+    width: 70px;
+    height: 70px;
+  }
+
+  .start-game-button {
     width: 100%;
-    margin: 0; 
-    overflow: hidden;
-    color: black;
+  }
 }
-
-#main-container {
-    display: grid;
-    grid-template-rows: auto 1fr; 
-    grid-template-columns: 5fr 1fr;
-    height: 100vh;
-    width: 100%;
-    gap: 0;
-    padding: 0; 
-    margin: 0;
-}
-
-#avatar-selection {
-    margin-top: auto;
-    width: 80%;
-    max-width: 65vw;
-    height: 65%;
-    max-height: 50vh;
-    padding: 5vw;
-    border: 1vw solid #a8711d;
-    border-radius: 2%;
-    background-color: #ffffffc6;
-    flex-direction: column;
-    display: flex;
-    justify-content: center;
-    align-self: center;
-    overflow: hidden;
-    text-align: center;
-    align-items: center;
-    position: relative;
-    top: 5vh;
-}
-
-#avatar-selection input{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-#avatar-selection button {
-    padding: 10px 20px;
-    background-color: rgba(135, 113, 25, 0.824);
-    border-radius: 40%;
-    border: 4px solid rgb(93, 93, 3);
-    cursor: pointer;
-    margin-left: 15px;
-    max-width: 400px;
-    box-shadow: none;
-    font-size: medium;
-    transition: all 0.3s ease;
-    color: black;
-}
-
-#avatar-selection button:hover {
-    background-color: rgba(179, 149, 33, 0.824);
-    transform: scale(1.05);
-}
-
-#input-section {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin: 10px auto;
-    flex-wrap: wrap;
-}
-
-#input-section input {
-    padding: 10px;
-    background-color: rgba(216, 176, 14, 0.824);
-    border-radius: 10%;
-    border: 4px solid rgb(93, 93, 44);
-    max-width: 300px;
-    box-shadow: none;
-    color: black;
-    outline: none;
-    width: 70%;
-    text-align: center;
-    outline: none;
-    font-size: medium;
-}
-
-@media (max-width: 600px) {
-    #title {
-        flex-direction: column;
-        height: auto;
-        padding: 10px;
-    }
-    
-    #title img {
-        width: 40px;
-        margin-right: 0;
-        margin-bottom: 5px;
-    }
-
-    #title h1 {
-        font-size: 1.2rem;
-    }
-    
-    #status-life {
-        flex-wrap: wrap;
-    }
-    
-    .life-bar {
-        width: 45%;
-        margin-bottom: 10px;
-    }
-    
-    #game-container {
-        width: 90%;
-        max-width: 90%;
-        padding: 10px;
-    }
-    
-    .swiper-slide img {
-        width: 90%;
-    }
-    
-    #joystick {
-        width: 100px;
-        height: 100px;
-    }
-    
-    .activity-panel button {
-        font-size: 1rem;
-        padding: 8px;
-    }
-}
-
-

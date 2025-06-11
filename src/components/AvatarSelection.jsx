@@ -1,73 +1,71 @@
-import React, { useState, useEffect } from 'react';
-import '../styles/AvatarSelection.css';
-
-const avatars = [
-  '/assets/ayam ygy.png',
-  '/assets/bebek ygy.png',
-  '/assets/capi ygy.png',
-];
+import React, { useState } from 'react';
+import '../styles/AvatarSelection.css'; // Import CSS file
 
 const AvatarSelection = ({ onAvatarSelect, onStartGame }) => {
-  const [currentAvatarIndex, setCurrentAvatarIndex] = useState(0);
+  const [selectedAvatar, setSelectedAvatar] = useState('');
   const [playerName, setPlayerName] = useState('');
 
-  const selectedAvatar = avatars[currentAvatarIndex];
+  const avatars = [
+    { name: 'Ayam', src: '/assets/ayam ygy.png' },
+    { name: 'Bebek', src: '/assets/bebek ygy.png' },
+    { name: 'Capybara', src: '/assets/capi ygy.png' }
+  ];
 
-  useEffect(() => {
-  onAvatarSelect(selectedAvatar); // Pilih avatar pertama saat komponen mount
-  }, []); // Array dependensi kosong, hanya berjalan sekali saat mount // Hanya bergantung pada onAvatarSelect // Hanya berjalan saat onAvatarSelect atau selectedAvatar berubah (termasuk mount awal)
-
-  const handleNextAvatar = () => {
-   setCurrentAvatarIndex((prevIndex) => {
-     const newIndex = (prevIndex + 1) % avatars.length;
-     onAvatarSelect(avatars[newIndex]); // Pastikan memanggil dengan avatar baru
-     return newIndex;
-   });
- };
-
- const handlePrevAvatar = () => {
-   setCurrentAvatarIndex((prevIndex) => {
-     const newIndex = (prevIndex - 1 + avatars.length) % avatars.length;
-     onAvatarSelect(avatars[newIndex]); // Pastikan memanggil dengan avatar baru
-     return newIndex;
-   });
- };
+  const handleAvatarSelect = (avatar) => {
+    setSelectedAvatar(avatar.src);
+    onAvatarSelect(avatar.src);
+  };
 
   const handleStartGame = () => {
-    if (!playerName.trim()) {
-      alert("Masukkan nama terlebih dahulu!");
-      return;
-    }
-
-    onStartGame(playerName); // Pemilihan avatar sudah terjadi di useEffect dan handleNext/Prev
+    onStartGame(playerName);
   };
 
   return (
-    <div id="game-container">
-      <div id="avatar-selection">
-        <h2>Pilih avatarmu!</h2>
-        <div id="avatar-display-container">
-          <button onClick={handlePrevAvatar}>◄ Previous</button>
-          <img
-            src={selectedAvatar}
-            alt="Pilihan Avatar"
-            className="avatar-img"
-          />
-          <button onClick={handleNextAvatar}>Next ►</button>
-        </div>
-        <div id="input-section">
-          <input
-            type="text"
-            id="player-name"
-            placeholder="Masukkan nama"
-            value={playerName}
-            onChange={(e) => setPlayerName(e.target.value)}
-          />
-          <button id="next-button" onClick={handleStartGame}>
-            Start
-          </button>
+    <div className="avatar-selection-container">
+      <h1 className="avatar-selection-title">
+        Life Simulation Game
+      </h1>
+
+      <div className="player-name-input-group">
+        <label className="player-name-label">
+          Enter Your Name:
+        </label>
+        <input
+          type="text"
+          value={playerName}
+          onChange={(e) => setPlayerName(e.target.value)}
+          className="player-name-input"
+          placeholder="Your name here..."
+        />
+      </div>
+
+      <div className="avatar-choose-section">
+        <h2 className="avatar-choose-title">Choose Your Avatar:</h2>
+        <div className="avatar-list">
+          {avatars.map((avatar) => (
+            <div
+              key={avatar.name}
+              onClick={() => handleAvatarSelect(avatar)}
+              className={`avatar-item ${selectedAvatar === avatar.src ? 'selected' : ''}`}
+            >
+              <img
+                src={avatar.src}
+                alt={avatar.name}
+                className="avatar-image"
+              />
+              <p className="avatar-name">{avatar.name}</p>
+            </div>
+          ))}
         </div>
       </div>
+
+      <button
+        onClick={handleStartGame}
+        disabled={!selectedAvatar || !playerName.trim()}
+        className="start-game-button"
+      >
+        Start Game
+      </button>
     </div>
   );
 };

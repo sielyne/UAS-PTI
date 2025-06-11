@@ -1,25 +1,43 @@
 import React from 'react';
-import '../styles/ActivityDetails.css';
-import HomeActivities from './activities/HomeActivities.jsx';
-import LakeActivities from './activities/LakeActivities.jsx';
-import MountainActivities from './activities/MountainActivities.jsx';
-import TempleActivities from './activities/TempleActivities.jsx';
-import BeachActivities from './activities/BeachActivities.jsx';
+import '../styles/ActivityDetails.css'; // Import CSS file
 
-const ActivityDetails = ({ location, onActivity, isVisible }) => {
-  if (!isVisible) {
-    return null;
-  }
+const ActivityDetails = ({ location, onActivity }) => {
+  const getActivitiesForLocation = (location) => {
+    const commonActivities = ['Work'];
+
+    switch (location) {
+      case 'Home':
+        return [...commonActivities, 'Eat', 'Sleep', 'Take a Bath'];
+      case 'Beach':
+        return [...commonActivities, 'Eat', 'Play', 'Buy Souvenir', 'Explore'];
+      case 'Lake':
+        return [...commonActivities, 'Eat', 'Play', 'Buy Souvenir', 'Explore'];
+      case 'Mountain':
+        return [...commonActivities, 'Eat', 'Play', 'Buy Souvenir', 'Explore'];
+      case 'Temple':
+        return [...commonActivities, 'Eat', 'Pray', 'Buy Souvenir', 'Explore'];
+      default:
+        return commonActivities;
+    }
+  };
+
+  const activities = getActivitiesForLocation(location);
 
   return (
-    <div id={`activity-${location.toLowerCase()}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <div className="location-greeting">You're at {location}!</div>
-      <div className="activity-panel">
-        {location === 'Home' && <HomeActivities onActivity={onActivity} />}
-        {location === 'Lake' && <LakeActivities onActivity={onActivity} />}
-        {location === 'Mountain' && <MountainActivities onActivity={onActivity} />}
-        {location === 'Temple' && <TempleActivities onActivity={onActivity} />}
-        {location === 'Beach' && <BeachActivities onActivity={onActivity} />}
+    <div className="activity-details-container">
+      <h3 className="activity-details-title">
+        Activities at {location}
+      </h3>
+      <div className="activity-details-buttons">
+        {activities.map((activity) => (
+          <button
+            key={activity}
+            onClick={() => onActivity(activity)}
+            className="activity-details-button"
+          >
+            {activity}
+          </button>
+        ))}
       </div>
     </div>
   );

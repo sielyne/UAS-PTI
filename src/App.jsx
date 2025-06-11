@@ -1,442 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import AvatarSelection from './components/AvatarSelection';
+import GameScreen from './components/GameScreen';
+import GameOverScreen from './components/GameOverScreen';
+import './index.css'; // Import general styles
 
-// Components
-const AvatarSelection = ({ onAvatarSelect, onStartGame }) => {
-  const [selectedAvatar, setSelectedAvatar] = useState('');
-  const [playerName, setPlayerName] = useState('');
-
-  const avatars = [
-    { name: 'Ayam', src: '/assets/ayam ygy.png' },
-    { name: 'Bebek', src: '/assets/bebek ygy.png' },
-    { name: 'Capybara', src: '/assets/capi ygy.png' }
-  ];
-
-  const handleAvatarSelect = (avatar) => {
-    setSelectedAvatar(avatar.src);
-    onAvatarSelect(avatar.src);
-  };
-
-  const handleStartGame = () => {
-    onStartGame(playerName);
-  };
-
-  return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
-      backgroundColor: '#2c3e50',
-      color: 'white',
-      fontFamily: 'Arial, sans-serif'
-    }}>
-      <h1 style={{ fontSize: '3rem', marginBottom: '2rem', textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
-        Ucup The Explorer
-      </h1>
-      
-      <div style={{ marginBottom: '2rem' }}>
-        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '1.2rem' }}>
-          Enter Your Name:
-        </label>
-        <input
-          type="text"
-          value={playerName}
-          onChange={(e) => setPlayerName(e.target.value)}
-          style={{
-            padding: '0.8rem',
-            fontSize: '1rem',
-            borderRadius: '8px',
-            border: 'none',
-            width: '300px',
-            textAlign: 'center'
-          }}
-          placeholder="Your name here..."
-        />
-      </div>
-
-      <div style={{ marginBottom: '2rem' }}>
-        <h2 style={{ marginBottom: '1rem' }}>Choose Your Avatar:</h2>
-        <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center' }}>
-          {avatars.map((avatar) => (
-            <div
-              key={avatar.name}
-              onClick={() => handleAvatarSelect(avatar)}
-              style={{
-                cursor: 'pointer',
-                padding: '1rem',
-                border: selectedAvatar === avatar.src ? '3px solid #3498db' : '3px solid transparent',
-                borderRadius: '12px',
-                backgroundColor: 'rgba(255,255,255,0.1)',
-                transition: 'all 0.3s ease',
-                transform: selectedAvatar === avatar.src ? 'scale(1.1)' : 'scale(1)'
-              }}
-            >
-              <img
-                src={avatar.src}
-                alt={avatar.name}
-                style={{ width: '100px', height: '100px', display: 'block' }}
-              />
-              <p style={{ textAlign: 'center', marginTop: '0.5rem' }}>{avatar.name}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <button
-        onClick={handleStartGame}
-        disabled={!selectedAvatar || !playerName.trim()}
-        style={{
-          padding: '1rem 2rem',
-          fontSize: '1.2rem',
-          backgroundColor: !selectedAvatar || !playerName.trim() ? '#7f8c8d' : '#27ae60',
-          color: 'white',
-          border: 'none',
-          borderRadius: '8px',
-          cursor: !selectedAvatar || !playerName.trim() ? 'not-allowed' : 'pointer',
-          transition: 'background-color 0.3s ease'
-        }}
-      >
-        Start Game
-      </button>
-    </div>
-  );
-};
-
-const Status = ({ player, gameTime }) => {
-  const formatTime = (hour, minute) => {
-    return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-  };
-
-  const getStatusColor = (value) => {
-    if (value >= 70) return '#27ae60';
-    if (value >= 40) return '#f39c12';
-    return '#e74c3c';
-  };
-
-  return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: '1rem',
-      backgroundColor: '#34495e',
-      color: 'white',
-      fontFamily: 'Arial, sans-serif'
-    }}>
-      <div>
-        <h3 style={{ margin: 0 }}>{player.name}</h3>
-        <p style={{ margin: '0.2rem 0' }}>Location: {player.location}</p>
-        <p style={{ margin: '0.2rem 0' }}>Money: Rp{player.money.toLocaleString()}</p>
-      </div>
-      
-      <div>
-        <p style={{ margin: '0.2rem 0' }}>Day {gameTime.day}</p>
-        <p style={{ margin: '0.2rem 0' }}>{formatTime(gameTime.hour, gameTime.minute)}</p>
-      </div>
-
-      <div style={{ display: 'flex', gap: '1rem' }}>
-        {[
-          { label: 'Happiness', value: player.happiness },
-          { label: 'Hunger', value: player.hunger },
-          { label: 'Hygiene', value: player.hygiene },
-          { label: 'Energy', value: player.energy }
-        ].map(stat => (
-          <div key={stat.label} style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '0.8rem' }}>{stat.label}</div>
-            <div style={{
-              width: '50px',
-              height: '8px',
-              backgroundColor: '#2c3e50',
-              borderRadius: '4px',
-              overflow: 'hidden'
-            }}>
-              <div style={{
-                width: `${stat.value}%`,
-                height: '100%',
-                backgroundColor: getStatusColor(stat.value),
-                transition: 'all 0.3s ease'
-              }} />
-            </div>
-            <div style={{ fontSize: '0.8rem' }}>{stat.value}%</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const Joystick = ({ onMove }) => {
-  return (
-    <div style={{
-      position: 'fixed',
-      bottom: '2rem',
-      left: '2rem',
-      zIndex: 1000
-    }}>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr 1fr',
-        gridTemplateRows: '1fr 1fr 1fr',
-        gap: '0.5rem',
-        width: '120px',
-        height: '120px'
-      }}>
-        <div></div>
-        <button
-          onClick={() => onMove('up')}
-          style={{
-            backgroundColor: '#3498db',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '1.2rem',
-            fontWeight: 'bold'
-          }}
-        >
-          ↑
-        </button>
-        <div></div>
-        
-        <button
-          onClick={() => onMove('left')}
-          style={{
-            backgroundColor: '#3498db',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '1.2rem',
-            fontWeight: 'bold'
-          }}
-        >
-          ←
-        </button>
-        <div></div>
-        <button
-          onClick={() => onMove('right')}
-          style={{
-            backgroundColor: '#3498db',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '1.2rem',
-            fontWeight: 'bold'
-          }}
-        >
-          →
-        </button>
-        
-        <div></div>
-        <button
-          onClick={() => onMove('down')}
-          style={{
-            backgroundColor: '#3498db',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '1.2rem',
-            fontWeight: 'bold'
-          }}
-        >
-          ↓
-        </button>
-        <div></div>
-      </div>
-    </div>
-  );
-};
-
-const GameInterface = ({ player, avatarPosition }) => {
-  const getLocationImage = (location) => {
-    switch (location) {
-      case 'Home': return '/assets/HomeMap.png';
-      case 'Mountain': return '/assets/MountainMap.png';
-      case 'Lake': return '/assets/LakeMap.png';
-      case 'Beach': return '/assets/BeachMap.png';
-      case 'Temple': return '/assets/TempleMap.png';
-      case 'MainMap':
-      default: return '/assets/MainMap.jpg';
-    }
-  };
-
-  return (
-    <div style={{
-      position: 'relative',
-      width: '100%',
-      height: '70vh',
-      overflow: 'hidden',
-      backgroundColor: '#2c3e50'
-    }}>
-      <img
-        src={getLocationImage(player.location)}
-        alt={`Map of ${player.location}`}
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover'
-        }}
-      />
-      
-      <div style={{
-        position: 'absolute',
-        left: `${avatarPosition.x}%`,
-        top: `${avatarPosition.y}%`,
-        transform: 'translate(-50%, -50%)',
-        transition: 'all 0.3s ease',
-        zIndex: 10
-      }}>
-        <img
-          src={player.avatar}
-          alt="Player Avatar"
-          style={{
-            width: '60px',
-            height: '60px',
-            borderRadius: '50%',
-            border: '3px solid #f39c12',
-            backgroundColor: 'rgba(255,255,255,0.8)'
-          }}
-        />
-      </div>
-    </div>
-  );
-};
-
-const ActivityDetails = ({ location, onActivity }) => {
-  const getActivitiesForLocation = (location) => {
-    const commonActivities = ['Work'];
-    
-    switch (location) {
-      case 'Home':
-        return [...commonActivities, 'Eat', 'Sleep', 'Take a Bath'];
-      case 'Beach':
-        return [...commonActivities, 'Eat', 'Play', 'Buy Souvenir', 'Explore'];
-      case 'Lake':
-        return [...commonActivities, 'Eat', 'Play', 'Buy Souvenir', 'Explore'];
-      case 'Mountain':
-        return [...commonActivities, 'Eat', 'Play', 'Buy Souvenir', 'Explore'];
-      case 'Temple':
-        return [...commonActivities, 'Eat', 'Pray', 'Buy Souvenir', 'Explore'];
-      default:
-        return commonActivities;
-    }
-  };
-
-  const activities = getActivitiesForLocation(location);
-
-  return (
-    <div style={{
-      position: 'fixed',
-      top: '50%',
-      right: '2rem',
-      transform: 'translateY(-50%)',
-      backgroundColor: 'rgba(52, 73, 94, 0.95)',
-      color: 'white',
-      padding: '1.5rem',
-      borderRadius: '12px',
-      minWidth: '200px',
-      zIndex: 1000,
-      boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-    }}>
-      <h3 style={{ margin: '0 0 1rem 0', textAlign: 'center' }}>
-        Activities at {location}
-      </h3>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        {activities.map((activity) => (
-          <button
-            key={activity}
-            onClick={() => onActivity(activity)}
-            style={{
-              padding: '0.8rem',
-              backgroundColor: '#3498db',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              transition: 'background-color 0.3s ease',
-              fontSize: '0.9rem'
-            }}
-            onMouseEnter={(e) => e.target.style.backgroundColor = '#2980b9'}
-            onMouseLeave={(e) => e.target.style.backgroundColor = '#3498db'}
-          >
-            {activity}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const Inventory = ({ playerInventory, playerMoney }) => {
-  return (
-    <div style={{
-      position: 'fixed',
-      bottom: '2rem',
-      right: '2rem',
-      backgroundColor: 'rgba(52, 73, 94, 0.95)',
-      color: 'white',
-      padding: '1rem',
-      borderRadius: '8px',
-      minWidth: '200px',
-      zIndex: 1000,
-      boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-    }}>
-      <h4 style={{ margin: '0 0 1rem 0' }}>Inventory</h4>
-      <p style={{ margin: '0.5rem 0' }}>Money: Rp{playerMoney.toLocaleString()}</p>
-      {Object.entries(playerInventory).map(([item, details]) => (
-        <div key={item} style={{ margin: '0.5rem 0' }}>
-          {item}: {details.stock}
-        </div>
-      ))}
-    </div>
-  );
-};
-
-const GameOverScreen = ({ player, onRestart }) => {
-  return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      backgroundColor: 'rgba(0,0,0,0.8)',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      color: 'white',
-      zIndex: 2000
-    }}>
-      <h1 style={{ fontSize: '3rem', marginBottom: '2rem', color: '#e74c3c' }}>Game Over!</h1>
-      <p style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>
-        {player.name}, your journey has ended.
-      </p>
-      <p style={{ fontSize: '1.2rem', marginBottom: '2rem' }}>
-        Final Money: Rp{player.money.toLocaleString()}
-      </p>
-      <button
-        onClick={onRestart}
-        style={{
-          padding: '1rem 2rem',
-          fontSize: '1.2rem',
-          backgroundColor: '#27ae60',
-          color: 'white',
-          border: 'none',
-          borderRadius: '8px',
-          cursor: 'pointer'
-        }}
-      >
-        Play Again
-      </button>
-    </div>
-  );
-};
-
-// Main App Component
 const App = () => {
   const [player, setPlayer] = useState({
     name: "",
@@ -459,7 +26,6 @@ const App = () => {
   const [timeInterval, setTimeInterval] = useState(null);
   const [gameOver, setGameOver] = useState(false);
 
-  // Define area boundaries for each map
   const mapAreas = {
     MainMap: {
       Home: { x: [10, 30], y: [10, 30] },
@@ -470,8 +36,8 @@ const App = () => {
     }
   };
 
-  const selectAvatar = (avatarName) => {
-    setPlayer(prevPlayer => ({ ...prevPlayer, avatar: avatarName }));
+  const selectAvatar = (avatarSrc) => {
+    setPlayer(prevPlayer => ({ ...prevPlayer, avatar: avatarSrc }));
   };
 
   const startGameTime = () => {
@@ -567,7 +133,7 @@ const App = () => {
   const checkAreaTransition = (newX, newY) => {
     if (player.location === 'MainMap' && mapAreas.MainMap) {
       for (const [area, bounds] of Object.entries(mapAreas.MainMap)) {
-        if (newX >= bounds.x[0] && newX <= bounds.x[1] && 
+        if (newX >= bounds.x[0] && newX <= bounds.x[1] &&
             newY >= bounds.y[0] && newY <= bounds.y[1]) {
           setPlayer(prevPlayer => ({
             ...prevPlayer,
@@ -607,9 +173,10 @@ const App = () => {
       case 'right':
         newX = Math.min(95, avatarPosition.x + moveDistance);
         break;
+      default:
+        break;
     }
 
-    // Check for area transitions
     if (!checkAreaTransition(newX, newY)) {
       setAvatarPosition({ x: newX, y: newY });
       setPlayer(prevPlayer => ({
@@ -794,42 +361,20 @@ const App = () => {
   };
 
   return (
-    <div style={{ fontFamily: 'Arial, sans-serif', minHeight: '100vh', backgroundColor: '#2c3e50' }}>
+    <div className="app-container">
       {!gameStarted && (
         <AvatarSelection onAvatarSelect={selectAvatar} onStartGame={startGame} />
       )}
 
       {gameStarted && !gameOver && (
-        <div>
-          <Status player={player} gameTime={gameTime} />
-          <GameInterface player={player} avatarPosition={avatarPosition} />
-          <Joystick onMove={handleMove} />
-          <ActivityDetails location={player.location} onActivity={handleActivity} />
-          <Inventory playerInventory={player.inventory} playerMoney={player.money} />
-          
-          {player.location !== 'MainMap' && (
-            <button
-              onClick={handleBackToMainMap}
-              style={{
-                position: 'fixed',
-                top: '2rem',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                padding: '0.8rem 1.5rem',
-                backgroundColor: '#e74c3c',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '1rem',
-                zIndex: 1000,
-                boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
-              }}
-            >
-              Back to Main Map
-            </button>
-          )}
-        </div>
+        <GameScreen
+          player={player}
+          gameTime={gameTime}
+          avatarPosition={avatarPosition}
+          onMove={handleMove}
+          onBackToMainMap={handleBackToMainMap}
+          onActivity={handleActivity}
+        />
       )}
 
       {gameOver && <GameOverScreen player={player} onRestart={restartGame} />}

@@ -1,0 +1,40 @@
+.game-over-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  z-index: 2000;
+}
+
+.game-over-title {
+  font-size: 3rem;
+  margin-bottom: 2rem;
+  color: #e74c3c;
+}
+
+.game-over-message {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.final-money {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.play-again-button {
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}

@@ -1,22 +1,42 @@
 import React from 'react';
-import '../styles/Joystick.css';
+import '../styles/Joystick.css'; // Import CSS file
 
 const Joystick = ({ onMove }) => {
   return (
-    <div id="joystick">
-      <button id="up" onClick={() => onMove('up')}>
-        ▲
-      </button>
-      <button id="left" onClick={() => onMove('left')}>
-        ◄
-      </button>
-      <div></div> {/* Elemen kosong untuk mengisi grid tengah */}
-      <button id="right" onClick={() => onMove('right')}>
-        ►
-      </button>
-      <button id="down" onClick={() => onMove('down')}>
-        ▼
-      </button>
+    <div className="joystick-wrapper">
+      <div className="joystick-grid">
+        <div></div>
+        <button
+          onClick={() => onMove('up')}
+          className="joystick-button"
+        >
+          ↑
+        </button>
+        <div></div>
+
+        <button
+          onClick={() => onMove('left')}
+          className="joystick-button"
+        >
+          ←
+        </button>
+        <div></div>
+        <button
+          onClick={() => onMove('right')}
+          className="joystick-button"
+        >
+          →
+        </button>
+
+        <div></div>
+        <button
+          onClick={() => onMove('down')}
+          className="joystick-button"
+        >
+          ↓
+        </button>
+        <div></div>
+      </div>
     </div>
   );
 };
