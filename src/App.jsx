@@ -39,25 +39,8 @@ const App = () => {
       Beach: { x: [70, 90], y: [70, 90] },
       Temple: { x: [40, 60], y: [70, 90] }
     }
-     const App = () => {
-  const [isWalking, setIsWalking] = useState(false);
-  const [player, setPlayer] = useState({ ... });
-  const [avatarPosition, setAvatarPosition] = useState({ x: 50, y: 50 });
-  // ... state lainnya
-
-  // Logging render App
+    
   console.log("Render App", player, avatarPosition, isWalking);
-
-  // ... semua fungsi lainnya dan useEffect
-  // ...
-  
-  return (
-    <>
-      {/* Komponen UI */}
-    </>
-  );
-};
-
   };
 
   const locationEvents = {
