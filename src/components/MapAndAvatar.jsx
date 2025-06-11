@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import '../styles/MapAndAvatar.css';
 
-const MapAndAvatar = ({ player, avatarPosition }) => {
-  const [isWalking, setIsWalking] = useState(false);
-
-  // Fungsi untuk mengambil gambar lokasi
+const MapAndAvatar = ({ player, avatarPosition, isWalking }) => {
+    console.log("Render Avatar:", player.avatar, isWalking);
   const getLocationImage = (location) => {
     switch (location) {
       case 'Home': return '/assets/HomeMap.png';

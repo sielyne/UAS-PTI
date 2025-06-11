@@ -1,4 +1,3 @@
-// src/App.js
 
 import React, { useState, useEffect, useCallback } from 'react';
 import AvatarSelection from './components/AvatarSelection';
@@ -14,6 +13,7 @@ const CONSUMABLE_FOOD_EFFECTS = {
 };
 
 const App = () => {
+   const [isWalking, setIsWalking] = useState(false);
   const [player, setPlayer] = useState({
     name: "",
     avatar: "",
@@ -30,6 +30,34 @@ const App = () => {
   });
 
   const [avatarPosition, setAvatarPosition] = useState({ x: 50, y: 50 });
+   useEffect(() => {
+  const handleKeyDown = (event) => {
+    if (!gameStarted || gameOver) return;
+
+    switch (event.key.toLowerCase()) {
+      case 'w':
+        handleMove('up');
+        break;
+      case 'a':
+        handleMove('left');
+        break;
+      case 's':
+        handleMove('down');
+        break;
+      case 'd':
+        handleMove('right');
+        break;
+      default:
+        break;
+    }
+  };
+
+  window.addEventListener('keydown', handleKeyDown);
+  return () => {
+    window.removeEventListener('keydown', handleKeyDown);
+  };
+}, [gameStarted, gameOver, handleMove]);
+
   const [gameTime, setGameTime] = useState({ hour: 8, minute: 0, day: 1 });
   const [gameStarted, setGameStarted] = useState(false);
   const [timeInterval, setTimeInterval] = useState(null);
@@ -37,6 +65,7 @@ const App = () => {
   const [showEventPopup, setShowEventPopup] = useState(false);
   const [currentEvent, setCurrentEvent] = useState(null);
 
+   
   const mapAreas = {
     MainMap: {
       Home: { x: [10, 30], y: [10, 30] },
@@ -214,11 +243,7 @@ const App = () => {
     return false;
   };
 
-  const handleMove = useCallback((direction) => {
-    if (gameOver || !gameStarted || showEventPopup) {
-      return; 
-    }
-
+  const handleMove = (direction) => {
     if (player.energy < 5) {
       alert("You don't have enough energy to move!");
       return;
@@ -252,7 +277,7 @@ const App = () => {
         energy: Math.max(0, prevPlayer.energy - 1)
       }));
     }
-  }, [gameOver, gameStarted, showEventPopup, player.energy, avatarPosition, checkAreaTransition, setAvatarPosition, setPlayer]);
+  };
 
   const handleBackToMainMap = () => {
     setPlayer(prevPlayer => ({ ...prevPlayer, location: 'MainMap' }));
@@ -614,6 +639,7 @@ const applyEventRewards = () => {
           onMove={handleMove}
           onBackToMainMap={handleBackToMainMap}
           onActivity={handleActivity}
+          isWalking={isWalking}
         />
       )}
 

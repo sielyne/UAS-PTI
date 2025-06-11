@@ -13,7 +13,8 @@ const GameScreen = ({
   avatarPosition,
   onMove,
   onBackToMainMap,
-  onActivity
+  onActivity,
+  isWalking //
 }) => {
   return (
     <div className="game-screen-container">
@@ -24,7 +25,7 @@ const GameScreen = ({
       <div className="game-main-area">
         {/* Left Column: Map and Avatar */}
         <div className="game-map-column"> {/* New wrapper for map for finer control */}
-          <MapAndAvatar player={player} avatarPosition={avatarPosition} />
+          <MapAndAvatar player={player} avatarPosition={avatarPosition} isWalking={isWalking} />
 
           {/* Floating Controls (Joystick & Back Button) - Positioned over the map */}
           <div className="game-overlay-controls">
