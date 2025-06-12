@@ -1,10 +1,9 @@
 // src/components/MapAndAvatar.jsx
-import React, { useEffect } from 'react'; // Hapus useState
+import React from 'react';
 import '../styles/MapAndAvatar.css';
 
-// isWalking sekarang diterima sebagai prop
 const MapAndAvatar = ({ player, avatarPosition, isWalking }) => {
-  console.log("Render Avatar:", player.avatar, "Is Walking:", isWalking); // Tambahkan log isWalking
+  console.log("Render Avatar:", player.avatar, "Is Walking:", isWalking);
 
   const getLocationImage = (location) => {
     switch (location) {
@@ -18,41 +17,15 @@ const MapAndAvatar = ({ player, avatarPosition, isWalking }) => {
     }
   };
 
-  // HAPUS useEffect ini sepenuhnya, karena penanganan keyboard dan isWalking
-  // sudah dipindahkan ke App.js
-  /*
-  useEffect(() => {
-    let keysPressed = {};
-    const handleKeyDown = (e) => {
-      keysPressed[e.key] = true;
-      if (
-        keysPressed["ArrowUp"] || keysPressed["ArrowDown"] ||
-        keysPressed["ArrowLeft"] || keysPressed["ArrowRight"] ||
-        keysPressed["w"] || keysPressed["a"] ||
-        keysPressed["s"] || keysPressed["d"]
-      ) {
-        setIsWalking(true); // INI AKAN DIHAPUS BERSAMA useEffect
-      }
-    };
-    const handleKeyUp = (e) => {
-      keysPressed[e.key] = false;
-      if (
-        !keysPressed["ArrowUp"] && !keysPressed["ArrowDown"] &&
-        !keysPressed["ArrowLeft"] && !keysPressed["ArrowRight"] &&
-        !keysPressed["w"] && !keysPressed["a"] &&
-        !keysPressed["s"] && !keysPressed["d"]
-      ) {
-        setIsWalking(false); // INI AKAN DIHAPUS BERSAMA useEffect
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-    };
-  }, []);
-  */
+  // 🔁 Fungsi untuk menentukan avatar yang ditampilkan
+  const getAvatarImage = () => {
+    if (isWalking) {
+      if (player.avatar.includes('bebek')) return '/bebek-walk.gif';
+      if (player.avatar.includes('ayam')) return '/ayam-walk.gif';
+      if (player.avatar.includes('capi')) return '/capi-walk.gif';
+    }
+    return player.avatar;
+  };
 
   return (
     <div className="map-and-avatar-container">
@@ -70,10 +43,9 @@ const MapAndAvatar = ({ player, avatarPosition, isWalking }) => {
         }}
       >
         <img
-          src={player.avatar}
+          src={getAvatarImage()}
           alt="Player Avatar"
-          // Class ini sekarang sepenuhnya bergantung pada prop isWalking dari App.js
-          className={`player-avatar-image ${isWalking ? 'walking-avatar' : ''}`}
+          className="player-avatar-image"
         />
       </div>
     </div>
