@@ -46,11 +46,11 @@ const App = () => {
 
   const mapAreas = {
     MainMap: {
-      Home: { x: [10, 30], y: [10, 30] },
-      Mountain: { x: [40, 60], y: [10, 30] },
-      Lake: { x: [70, 90], y: [10, 30] },
-      Beach: { x: [70, 90], y: [70, 90] },
-      Temple: { x: [40, 60], y: [70, 90] }
+      Home: { x: [10, 20], y: [10, 25] }, // Adjusted Y coordinates
+      Mountain: { x: [40, 60], y: [15, 25] }, // Adjusted Y coordinates
+      Lake: { x: [70, 90], y: [25, 35] }, // Adjusted Y coordinates
+      Beach: { x: [70, 90], y: [70, 90] }, // Adjusted Y coordinates
+      Temple: { x: [40, 60], y: [60, 75] } // Adjusted Y coordinates
     }
   };
 
@@ -241,7 +241,7 @@ const App = () => {
           newY >= bounds.y[0] && newY <= bounds.y[1]) {
           // Check if player has enough money before transitioning
           if (player.money < moneyCost) {
-            alert("Uang tidak cukup untuk berpindah ke lokasi ini (dibutuhkan Rp 500.000).");
+            alert("Insufficient money to move to this location (Rp 500,000 required).");
             return false; // Prevent transition
           }
 
@@ -263,7 +263,8 @@ const App = () => {
   }, [player.location, player.money, mapAreas.MainMap, triggerLocationEvent]); // Added player.money to dependencies
 
   const handleMove = useCallback((direction) => {
-    const energyCost = 5; // Fixed energy cost for normal movement
+    // Changed energy cost to 1 to allow movement until energy reaches 0
+    const energyCost = 1; // Fixed energy cost for normal movement
     if (player.energy < energyCost) { // Check with appropriate cost
       alert("You don't have enough energy to move!");
       return;
@@ -341,7 +342,7 @@ const App = () => {
 
         // Check if player has enough money before allowing direct travel
         if (player.money < moneyCost) {
-          alert(`Uang tidak cukup untuk berpindah ke ${targetLocation} (dibutuhkan Rp 500.000).`);
+          alert(`Insufficient money to move to ${targetLocation} (Rp 500,000 required).`);
           return; // Prevent travel
         }
 
