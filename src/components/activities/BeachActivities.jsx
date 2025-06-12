@@ -19,7 +19,7 @@ const BeachActivities = ({ onActivity }) => {
         <span className="info-icon" title="Swimming at Beach to earn +25 Happiness. This action will consume -20 Energy and -10 Hygiene!">
           i
         </span>
-        <button onClick={() => onActivity('Play')}>Swim</button>
+        <button onClick={() => onActivity('Swim')}>Swim</button>
       </div>
       <div className="activity-option">
         <span className="info-icon" title="Buy a souvenir at Beach to earn +20 Happiness. This action will consume -Rp200.000!">
