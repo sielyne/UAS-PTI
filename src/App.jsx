@@ -233,7 +233,7 @@ const App = () => {
       return;
     }
 
-    const moveDistance = 5;
+    const moveDistance = 2;
     let newX = avatarPosition.x;
     let newY = avatarPosition.y;
 
