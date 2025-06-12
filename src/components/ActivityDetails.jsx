@@ -3,19 +3,20 @@ import React from 'react';
 import '../styles/ActivityDetails.css';
 
 // Import semua komponen aktivitas per lokasi yang sudah Anda buat
+// Ini berasal dari Version 2
 import HomeActivities from './activities/HomeActivities';
 import BeachActivities from './activities/BeachActivities';
 import LakeActivities from './activities/LakeActivities';
 import MountainActivities from './activities/MountainActivities';
 import TempleActivities from './activities/TempleActivities';
-// import MainMapActivities (jika Anda membuat komponen terpisah untuk ini, saat ini main map sudah di handle langsung)
 
 const ActivityDetails = ({ location, onActivity }) => {
-  // Fungsi ini sekarang akan mengembalikan KOMPONEN React, bukan array string
+  // Fungsi ini akan mengembalikan KOMPONEN React (dari Versi 2)
+  // atau daftar link event untuk MainMap (dari Versi 1 dan 2)
   const renderActivitiesForLocation = (currentLocation) => {
     switch (currentLocation) {
       case 'MainMap':
-        // Jika MainMap, render daftar link event (seperti yang sudah Anda lakukan)
+        // Logika rendering MainMap dari kedua versi (sama)
         return (
           <>
             <h4 className="activity-details-title">Events:</h4>
@@ -27,14 +28,19 @@ const ActivityDetails = ({ location, onActivity }) => {
           </>
         );
       case 'Home':
+        // Merender komponen aktivitas Home (dari Versi 2)
         return <HomeActivities onActivity={onActivity} />;
       case 'Beach':
+        // Merender komponen aktivitas Beach (dari Versi 2)
         return <BeachActivities onActivity={onActivity} />;
       case 'Lake':
+        // Merender komponen aktivitas Lake (dari Versi 2)
         return <LakeActivities onActivity={onActivity} />;
       case 'Mountain':
+        // Merender komponen aktivitas Mountain (dari Versi 2)
         return <MountainActivities onActivity={onActivity} />;
       case 'Temple':
+        // Merender komponen aktivitas Temple (dari Versi 2)
         return <TempleActivities onActivity={onActivity} />;
       default:
         return <p>No activities available for this location.</p>;
@@ -47,7 +53,8 @@ const ActivityDetails = ({ location, onActivity }) => {
         {location === 'MainMap' ? 'Main Map Events' : `Activities at ${location}`}
       </h3>
       <div className="activity-details-list">
-        {renderActivitiesForLocation(location)} {/* Panggil fungsi render yang sekarang mengembalikan komponen */}
+        {/* Memanggil fungsi render yang mengembalikan komponen atau JSX untuk MainMap */}
+        {renderActivitiesForLocation(location)}
       </div>
     </div>
   );

@@ -1,12 +1,67 @@
 /* src/styles/ActivityDetails.css */
 
+/* --- ROOT (CSS Variables for ActivityDetails specific) --- */
+:root {
+    /* Colors */
+    --ad-color-bg: rgba(44, 62, 80, 0.9);
+    --ad-color-title: #f39c12;
+    --ad-color-text: #ecf0f1;
+    --ad-color-option-bg: rgba(52, 73, 94, 0.7);
+    --ad-color-option-bg-hover: rgba(52, 73, 94, 0.85);
+    --ad-color-button-bg: #3498db;
+    --ad-color-button-bg-hover: #2980b9;
+    --ad-color-info-icon-bg: rgba(255, 255, 255, 0.15);
+    --ad-color-info-icon-border: rgba(255, 255, 255, 0.2);
+    --ad-color-info-icon-hover: rgba(255, 255, 255, 0.3);
+    --ad-color-tooltip-bg: rgba(0, 0, 0, 0.8);
+    --ad-color-link-bg: rgba(62, 83, 104, 0.7);
+    --ad-color-link-bg-hover: rgba(72, 93, 114, 0.8);
+    --ad-color-link-hover: #f39c12;
+    --ad-color-scrollbar-thumb: #f39c12;
+    --ad-color-scrollbar-track: #2c3e50;
+    --ad-color-scrollbar-thumb-hover: #e67e22;
+
+    /* Spacing */
+    --ad-padding-container: 0.7rem; /* Agak lebih kecil */
+    --ad-margin-bottom-container: 0.7rem; /* Agak lebih kecil */
+    --ad-margin-bottom-title: 0.5rem; /* Agak lebih kecil */
+    --ad-gap-list: 5px; /* Agak lebih kecil */
+    --ad-padding-right-list: 3px; /* Agak lebih kecil */
+    --ad-padding-option: 4px 7px; /* Agak lebih kecil */
+    --ad-padding-button: 5px 9px; /* Agak lebih kecil */
+    --ad-margin-right-info-icon: 5px; /* Agak lebih kecil */
+    --ad-padding-tooltip: 4px 7px; /* Agak lebih kecil */
+    --ad-margin-bottom-tooltip: 5px; /* Agak lebih kecil */
+    --ad-padding-link: 6px 9px; /* Agak lebih kecil */
+    --ad-margin-bottom-link: 4px; /* Agak lebih kecil */
+
+    /* Sizes */
+    --ad-font-size-title: 1.1rem; /* Agak lebih kecil */
+    --ad-font-size-button: 0.8rem; /* Agak lebih kecil */
+    --ad-font-size-info-icon: 0.7rem; /* Agak lebih kecil */
+    --ad-size-info-icon: 16px; /* Agak lebih kecil */
+    --ad-font-size-tooltip: 0.7rem; /* Agak lebih kecil */
+    --ad-font-size-link: 0.85rem; /* Agak lebih kecil */
+    --ad-scrollbar-width: 5px; /* Agak lebih kecil */
+
+    /* Border Radius */
+    --ad-border-radius-sm: 3px; /* Agak lebih kecil */
+    --ad-border-radius-md: 5px; /* Agak lebih kecil */
+
+    /* Shadows */
+    --ad-shadow-container: 0 2px 5px rgba(0, 0, 0, 0.25); /* Agak lebih kecil */
+    --ad-shadow-button: 0 1px 2px rgba(0, 0, 0, 0.2); /* Agak lebih kecil */
+    --ad-shadow-button-hover: 0 2px 3px rgba(0, 0, 0, 0.25); /* Agak lebih kecil */
+    --ad-shadow-link: 0 1px 1px rgba(0, 0, 0, 0.1); /* Agak lebih kecil */
+}
+
 .activity-details-container {
-    background-color: rgba(44, 62, 80, 0.9);
-    padding: 0.8rem; /* Lebih kecil lagi dari 1rem */
-    border-radius: 6px; /* Sedikit lebih kecil */
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3); /* Sedikit lebih kecil */
-    color: #ecf0f1;
-    margin-bottom: 0.8rem; /* Lebih kecil lagi dari 1rem */
+    background-color: var(--ad-color-bg);
+    padding: var(--ad-padding-container);
+    border-radius: var(--ad-border-radius-md);
+    box-shadow: var(--ad-shadow-container);
+    color: var(--ad-color-text);
+    margin-bottom: var(--ad-margin-bottom-container);
 
     display: flex;
     flex-direction: column;
@@ -15,94 +70,90 @@
 }
 
 .activity-details-title {
-    font-size: 1.2rem; /* Lebih kecil lagi dari 1.3rem */
-    color: #f39c12;
-    margin-bottom: 0.6rem; /* Lebih kecil lagi dari 0.8rem */
+    font-size: var(--ad-font-size-title);
+    color: var(--ad-color-title);
+    margin-bottom: var(--ad-margin-bottom-title);
     text-align: center;
-    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4); /* Sedikit lebih halus */
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4);
     flex-shrink: 0;
 }
 
 .activity-details-list {
     display: flex;
     flex-direction: column;
-    gap: 6px; /* Lebih kecil lagi dari 8px */
+    gap: var(--ad-gap-list);
 
     flex: 1;
     overflow-y: auto;
-    padding-right: 4px; /* Lebih kecil lagi dari 5px */
+    padding-right: var(--ad-padding-right-list);
 
     scrollbar-width: thin;
-    scrollbar-color: #f39c12 #2c3e50;
+    scrollbar-color: var(--ad-color-scrollbar-thumb) var(--ad-color-scrollbar-track);
 }
 
-/* Styling untuk setiap kontainer opsi aktivitas */
 .activity-option {
     display: flex;
     align-items: center;
-    background-color: rgba(52, 73, 94, 0.7);
-    padding: 5px 8px; /* Lebih kecil lagi dari 6px 10px */
-    border-radius: 4px; /* Sedikit lebih kecil */
+    background-color: var(--ad-color-option-bg);
+    padding: var(--ad-padding-option);
+    border-radius: var(--ad-border-radius-sm);
     transition: background-color 0.2s ease;
 }
 
 .activity-option:hover {
-    background-color: rgba(52, 73, 94, 0.85); /* Efek hover sedikit lebih kalem */
+    background-color: var(--ad-color-option-bg-hover);
 }
 
-/* Styling untuk tombol di dalam setiap opsi aktivitas */
 .activity-option button {
     flex-grow: 1;
-    background-color: #3498db;
-    color: white;
-    padding: 6px 10px; /* Lebih kecil lagi dari 8px 12px */
+    background-color: var(--ad-color-button-bg);
+    color: var(--ad-color-text);
+    padding: var(--ad-padding-button);
     border: none;
-    border-radius: 4px; /* Sedikit lebih kecil */
+    border-radius: var(--ad-border-radius-sm);
     cursor: pointer;
-    font-size: 0.85rem; /* Lebih kecil lagi dari 0.9rem */
+    font-size: var(--ad-font-size-button);
     font-weight: bold;
     text-transform: uppercase;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25); /* Sedikit lebih kecil */
+    box-shadow: var(--ad-shadow-button);
     transition: background-color 0.3s ease, transform 0.1s ease;
-    letter-spacing: 0.2px; /* Kurangi letter-spacing */
+    letter-spacing: 0.1px; /* Sedikit lebih kecil */
 }
 
 .activity-option button:hover {
-    background-color: #2980b9;
-    transform: translateY(0); /* Hapus efek terangkat, atau set sangat kecil */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Sedikit lebih kecil */
+    background-color: var(--ad-color-button-bg-hover);
+    transform: translateY(-0.5px); /* Efek terangkat lebih kecil */
+    box-shadow: var(--ad-shadow-button-hover);
 }
 
 .activity-option button:active {
     transform: translateY(0);
-    box-shadow: 0 0px 1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0px 1px rgba(0, 0, 0, 0.05); /* Sedikit lebih halus */
 }
 
-/* Styling untuk info-icon (huruf 'i' di dalam lingkaran) */
 .activity-option .info-icon {
-    background-color: rgba(255, 255, 255, 0.15); /* Lebih transparan */
-    color: #fff;
+    background-color: var(--ad-color-info-icon-bg);
+    color: var(--ad-color-text);
     border-radius: 50%;
-    width: 18px; /* Lebih kecil lagi dari 20px */
-    height: 18px; /* Lebih kecil lagi dari 20px */
-    min-width: 18px;
-    min-height: 18px;
+    width: var(--ad-size-info-icon);
+    height: var(--ad-size-info-icon);
+    min-width: var(--ad-size-info-icon);
+    min-height: var(--ad-size-info-icon);
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 0.75rem; /* Lebih kecil lagi dari 0.8rem */
+    font-size: var(--ad-font-size-info-icon);
     font-weight: bold;
-    margin-right: 6px; /* Lebih kecil lagi dari 8px */
+    margin-right: var(--ad-margin-right-info-icon);
     cursor: help;
-    border: 1px solid rgba(255, 255, 255, 0.2); /* Sedikit lebih transparan */
+    border: 1px solid var(--ad-color-info-icon-border);
     transition: background-color 0.2s ease;
 }
 
 .activity-option .info-icon:hover {
-    background-color: rgba(255, 255, 255, 0.3); /* Efek hover lebih kalem */
+    background-color: var(--ad-color-info-icon-hover);
 }
 
-/* Styling untuk tooltip (konten 'title' dari info-icon) */
 .activity-option .info-icon[title] {
     position: relative;
 }
@@ -113,14 +164,14 @@
     bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
-    background-color: rgba(0, 0, 0, 0.8); /* Sedikit lebih transparan */
-    color: white;
-    padding: 5px 8px; /* Lebih kecil lagi dari 6px 10px */
-    border-radius: 4px; /* Sedikit lebih kecil */
-    font-size: 0.75rem; /* Lebih kecil lagi dari 0.8rem */
+    background-color: var(--ad-color-tooltip-bg);
+    color: var(--ad-color-text);
+    padding: var(--ad-padding-tooltip);
+    border-radius: var(--ad-border-radius-sm);
+    font-size: var(--ad-font-size-tooltip);
     white-space: nowrap;
     z-index: 1000;
-    margin-bottom: 6px; /* Lebih kecil lagi dari 8px */
+    margin-bottom: var(--ad-margin-bottom-tooltip);
     pointer-events: none;
     opacity: 0;
     animation: fadeInTooltip 0.2s forwards;
@@ -128,42 +179,74 @@
 
 @keyframes fadeInTooltip {
     from { opacity: 0; transform: translateX(-50%) translateY(0); }
-    to { opacity: 1; transform: translateX(-50%) translateY(-1px); } /* Efek terangkat lebih kecil */
+    to { opacity: 1; transform: translateX(-50%) translateY(-0.5px); } /* Efek terangkat lebih kecil */
 }
 
-/* Styling scrollbar untuk Webkit (Chrome, Safari, Edge) */
 .activity-details-list::-webkit-scrollbar {
-    width: 6px; /* Lebih kecil lagi dari 8px */
+    width: var(--ad-scrollbar-width);
 }
 .activity-details-list::-webkit-scrollbar-track {
-    background: #2c3e50;
+    background: var(--ad-color-scrollbar-track);
     border-radius: 10px;
 }
 .activity-details-list::-webkit-scrollbar-thumb {
-    background: #f39c12;
+    background: var(--ad-color-scrollbar-thumb);
     border-radius: 10px;
-    border: 1px solid #2c3e50; /* Border lebih tipis */
+    border: 1px solid var(--ad-color-scrollbar-track);
 }
 .activity-details-list::-webkit-scrollbar-thumb:hover {
-    background: #e67e22;
+    background: var(--ad-color-scrollbar-thumb-hover);
 }
 
-
-/* Styling untuk link di MainMap */
 .activity-link {
-    background-color: rgba(62, 83, 104, 0.7); /* Sedikit lebih transparan */
-    padding: 7px 10px; /* Lebih kecil lagi dari 8px 12px */
-    border-radius: 4px; /* Sedikit lebih kecil */
-    margin-bottom: 5px; /* Lebih kecil lagi dari 6px */
+    background-color: var(--ad-color-link-bg);
+    padding: var(--ad-padding-link);
+    border-radius: var(--ad-border-radius-sm);
+    margin-bottom: var(--ad-margin-bottom-link);
     cursor: pointer;
     transition: background-color 0.2s ease, color 0.2s ease;
-    color: #ecf0f1;
-    font-size: 0.9rem; /* Lebih kecil lagi dari 0.95rem */
+    color: var(--ad-color-text);
+    font-size: var(--ad-font-size-link);
     text-align: center;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15); /* Sedikit lebih kecil */
+    box-shadow: var(--ad-shadow-link);
 }
 
 .activity-link:hover {
-    background-color: rgba(72, 93, 114, 0.8); /* Efek hover lebih kalem */
-    color: #f39c12;
+    background-color: var(--ad-color-link-bg-hover);
+    color: var(--ad-color-link-hover);
+}
+
+/* --- Responsive Adjustments for ActivityDetails --- */
+@media (max-width: 480px) {
+    .activity-details-container {
+        padding: 0.6rem;
+        margin-bottom: 0.6rem;
+    }
+    .activity-details-title {
+        font-size: 1rem;
+        margin-bottom: 0.4rem;
+    }
+    .activity-details-list {
+        gap: 4px;
+    }
+    .activity-option {
+        padding: 3px 5px;
+    }
+    .activity-option button {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+    }
+    .info-icon {
+        width: 14px;
+        height: 14px;
+        min-width: 14px;
+        min-height: 14px;
+        font-size: 0.65rem;
+        margin-right: 3px;
+    }
+    .activity-link {
+        font-size: 0.8rem;
+        padding: 5px 8px;
+        margin-bottom: 3px;
+    }
 }

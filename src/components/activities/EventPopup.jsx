@@ -1,8 +1,7 @@
-// src/components/activities/EventPopup.jsx (atau di mana pun file ini berada)
 import React from "react";
-import '../../styles/EventPopup.css';
+import '../../styles/EventPopup.css'; // Import file CSS
 
-const EventPopup = ({ event, onClose, onAttemptActivity }) => { // onAttemptActivity adalah applyEventRewards
+const EventPopup = ({ event, onClose }) => { // Hapus onAttemptActivity dari props
   const formatRewards = (rewards) => {
     const rewardsList = [];
 
@@ -30,32 +29,21 @@ const EventPopup = ({ event, onClose, onAttemptActivity }) => { // onAttemptActi
     return rewardsList;
   };
 
-  // Ubah fungsi ini jika tombol '✕' juga harus memberikan rewards
-  // Atau tetap seperti ini jika '✕' hanya menutup tanpa rewards
   const handleClosePopup = () => {
-    // Pesan ini hanya jika Anda ingin pemain MENUNDA mendapatkan hadiah
-    // Jika tombol 'Go to Activities Menu' langsung memberikan hadiah, pesan ini bisa dihapus
-    alert(`Event akan tetap aktif di ${event.location}. Anda bisa mendapatkan hadiah dengan mengklik "Go to Activities Menu" atau melakukan aktivitas 'Event' di sana.`);
-    onClose();
+    alert(`Untuk mendapatkan hadiah event ini, Anda harus melakukan aktivitas '${event.requiredActivity}' di menu Activities saat berada di ${event.location}!`);
+    onClose(); // Hanya menutup popup
   };
 
-  // src/components/activities/EventPopup.jsx
-
-// ... (kode di atasnya sama) ...
-
-const handleCollectRewards = () => {
-  console.log("EventPopup: Tombol 'Klaim Hadiah & Tutup' diklik."); // DEBUGGING
-  onAttemptActivity(); // Ini adalah applyEventRewards dari App.js
-  onClose(); // Menutup popup
-};
-
-// ... (kode di bawahnya sama) ...
+  const handleGoToActivities = () => {
+    alert(`Sekarang pilih aktivitas '${event.requiredActivity}' di menu Activities untuk mengklaim hadiah di ${event.location}!`);
+    onClose(); // Hanya menutup popup, tidak langsung memberikan rewards
+  };
 
   return (
     <div className="event-popup-overlay">
       <div className="event-popup-container">
         <div className="event-popup-header">
-          <h2 className="event-popup-title">🎉 Event</h2>
+          <h2 className="event-popup-title">🎉 Event Ditemukan!</h2>
           <button className="event-popup-close" onClick={handleClosePopup}>
             ✕
           </button>
@@ -63,7 +51,7 @@ const handleCollectRewards = () => {
 
         <div className="event-popup-content">
           <div className="event-location">
-            <h3>Current Location: {event.location}</h3>
+            <h3>Lokasi Saat Ini: {event.location}</h3>
           </div>
 
           <div className="event-message">
@@ -71,8 +59,8 @@ const handleCollectRewards = () => {
           </div>
 
           <div className="event-rewards">
-            {/* Ubah teks ini agar lebih jelas */}
-            <h4>🎁 Rewards (klik tombol di bawah untuk klaim):</h4>
+            {/* Pesan sekarang spesifik untuk requiredActivity */}
+            <h4>🎁 Hadiah (Klaim dengan aktivitas '{event.requiredActivity}' di {event.location}):</h4>
             <ul>
               {formatRewards(event.rewards).map((reward, index) => (
                 <li key={index}>{reward}</li>
@@ -82,8 +70,8 @@ const handleCollectRewards = () => {
         </div>
 
         <div className="event-popup-footer">
-          <button className="event-popup-button" onClick={handleCollectRewards}>
-            Klaim Hadiah & Tutup
+          <button className="event-popup-button" onClick={handleGoToActivities}>
+            Lihat Menu Aktivitas
           </button>
         </div>
       </div>

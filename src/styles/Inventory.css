@@ -1,11 +1,47 @@
 /* src/styles/Inventory.css */
 
+/* --- ROOT (CSS Variables for Inventory specific) --- */
+:root {
+    /* Colors */
+    --inv-color-bg: rgba(52, 73, 94, 0.95);
+    --inv-color-title: #f39c12;
+    --inv-color-text: white;
+    --inv-color-empty-message: rgba(255, 255, 255, 0.6);
+    --inv-color-item-border: rgba(255, 255, 255, 0.05);
+    --inv-color-item-stock: #f39c12; /* Consistent with activity title color */
+    --inv-color-money: #2ecc71;
+    --inv-color-scrollbar-thumb: #f39c12;
+    --inv-color-scrollbar-track: #2c3e50;
+    --inv-color-scrollbar-thumb-hover: #e67e22;
+
+    /* Spacing */
+    --inv-padding-container: 0.5rem; /* Agak lebih kecil */
+    --inv-margin-bottom-title: 0.4rem; /* Agak lebih kecil */
+    --inv-padding-right-list: 3px; /* Agak lebih kecil */
+    --inv-margin-bottom-list: 0.5rem; /* Agak lebih kecil */
+    --inv-padding-empty-message: 0.3rem 0; /* Agak lebih kecil */
+    --inv-padding-item: 0.2rem 0; /* Agak lebih kecil */
+
+    /* Sizes */
+    --inv-font-size-title: 1rem; /* Agak lebih kecil */
+    --inv-font-size-empty-message: 0.8rem; /* Agak lebih kecil */
+    --inv-font-size-item: 0.8rem; /* Agak lebih kecil */
+    --inv-font-size-money: 0.9rem; /* Agak lebih kecil */
+    --inv-scrollbar-width: 5px; /* Agak lebih kecil */
+
+    /* Border Radius */
+    --inv-border-radius-md: 5px; /* Agak lebih kecil */
+
+    /* Shadows */
+    --inv-shadow-container: 0 2px 8px rgba(0,0,0,0.25); /* Agak lebih kecil */
+}
+
 .inventory-container {
-    background-color: rgba(52, 73, 94, 0.95);
-    color: white;
-    padding: 0.6rem; /* Lebih kecil lagi dari 0.8rem */
-    border-radius: 6px; /* Sedikit lebih kecil */
-    box-shadow: 0 3px 10px rgba(0,0,0,0.3); /* Sedikit lebih kecil */
+    background-color: var(--inv-color-bg);
+    color: var(--inv-color-text);
+    padding: var(--inv-padding-container);
+    border-radius: var(--inv-border-radius-md);
+    box-shadow: var(--inv-shadow-container);
     box-sizing: border-box;
 
     display: flex;
@@ -15,9 +51,9 @@
 }
 
 .inventory-title {
-    margin: 0 0 0.5rem 0; /* Lebih kecil lagi dari 0.6rem */
-    font-size: 1.1rem; /* Lebih kecil lagi dari 1.2rem */
-    color: #f39c12;
+    margin: 0 0 var(--inv-margin-bottom-title) 0;
+    font-size: var(--inv-font-size-title);
+    color: var(--inv-color-title);
     text-align: center;
     flex-shrink: 0;
 }
@@ -25,48 +61,46 @@
 .inventory-items-list {
     flex: 1;
     overflow-y: auto;
-    padding-right: 4px; /* Lebih kecil lagi dari 5px */
-    margin-bottom: 0.6rem; /* Lebih kecil lagi dari 0.8rem */
+    padding-right: var(--inv-padding-right-list);
+    margin-bottom: var(--inv-margin-bottom-list);
 
-    /* Styling scrollbar */
     scrollbar-width: thin;
-    scrollbar-color: #f39c12 #2c3e50;
+    scrollbar-color: var(--inv-color-scrollbar-thumb) var(--inv-color-scrollbar-track);
 }
 
-/* Webkit scrollbar styling */
 .inventory-items-list::-webkit-scrollbar {
-    width: 6px; /* Lebih kecil lagi dari 7px */
+    width: var(--inv-scrollbar-width);
 }
 
 .inventory-items-list::-webkit-scrollbar-track {
-    background: #2c3e50;
+    background: var(--inv-color-scrollbar-track);
     border-radius: 10px;
 }
 
 .inventory-items-list::-webkit-scrollbar-thumb {
-    background: #f39c12;
+    background: var(--inv-color-scrollbar-thumb);
     border-radius: 10px;
-    border: 1px solid #2c3e50; /* Border sedikit lebih tipis */
+    border: 1px solid var(--inv-color-scrollbar-track);
 }
 
 .inventory-items-list::-webkit-scrollbar-thumb:hover {
-    background: #e67e22;
+    background: var(--inv-color-scrollbar-thumb-hover);
 }
 
 .inventory-empty-message {
     text-align: center;
     font-style: italic;
-    color: rgba(255, 255, 255, 0.6); /* Sedikit lebih transparan */
-    padding: 0.4rem 0; /* Lebih kecil lagi dari 0.5rem */
-    font-size: 0.85rem; /* Lebih kecil lagi dari 0.9rem */
+    color: var(--inv-color-empty-message);
+    padding: var(--inv-padding-empty-message);
+    font-size: var(--inv-font-size-empty-message);
 }
 
 .inventory-item {
     display: flex;
     justify-content: space-between;
-    padding: 0.25rem 0; /* Lebih kecil lagi dari 0.3rem */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* Lebih transparan */
-    font-size: 0.85rem; /* Lebih kecil lagi dari 0.9rem */
+    padding: var(--inv-padding-item);
+    border-bottom: 1px solid var(--inv-color-item-border);
+    font-size: var(--inv-font-size-item);
 }
 
 .inventory-item:last-child {
@@ -78,17 +112,39 @@
 }
 
 .item-stock {
-    color: #f39c12;
+    color: var(--inv-color-item-stock);
 }
 
 .inventory-money {
     margin-top: auto;
     text-align: center;
-    font-size: 0.95rem; /* Lebih kecil lagi dari 1rem */
+    font-size: var(--inv-font-size-money);
     font-weight: bold;
-    color: #2ecc71;
+    color: var(--inv-color-money);
     flex-shrink: 0;
 }
 
-/* Media queries for responsiveness (jika ada, sesuaikan lagi padding/margin di sini) */
-/* Tidak ada perubahan pada media queries jika belum ada */
+/* --- Responsive Adjustments for Inventory --- */
+@media (max-width: 480px) {
+    .inventory-container {
+        padding: 0.4rem;
+    }
+    .inventory-title {
+        font-size: 0.95rem;
+        margin-bottom: 0.3rem;
+    }
+    .inventory-items-list {
+        margin-bottom: 0.4rem;
+    }
+    .inventory-empty-message {
+        font-size: 0.75rem;
+        padding: 0.2rem 0;
+    }
+    .inventory-item {
+        font-size: 0.75rem;
+        padding: 0.15rem 0;
+    }
+    .inventory-money {
+        font-size: 0.8rem;
+    }
+}
