@@ -23,7 +23,7 @@ const AvatarSelection = ({ onAvatarSelect, onStartGame }) => {
   return (
     <div className="avatar-selection-container">
       <h1 className="avatar-selection-title">
-        Life Simulation Game
+        Ucup Menjelajahi Nusantara: The Explorer
       </h1>
 
       <div className="player-name-input-group">
