@@ -24,7 +24,6 @@ const NON_CONSUMABLE_ITEM_EFFECTS = {
 const App = () => {
   const [isWalking, setIsWalking] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
-  const [isWalking, setIsWalking] = useState(false); // Pindahkan state isWalking ke sini
   const [player, setPlayer] = useState({
     name: "",
     avatar: "",
