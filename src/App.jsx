@@ -13,6 +13,7 @@ const CONSUMABLE_FOOD_EFFECTS = {
 };
 
 const App = () => {
+  const [isMoving, setIsMoving] = useState(false);
   const [isWalking, setIsWalking] = useState(false); // Pindahkan state isWalking ke sini
   const [player, setPlayer] = useState({
     name: "",
