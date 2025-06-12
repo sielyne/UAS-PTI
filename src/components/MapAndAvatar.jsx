@@ -1,4 +1,4 @@
-// src/components/MapAndAvatar.jsx
+
 import React from 'react';
 import '../styles/MapAndAvatar.css';
 
@@ -17,14 +17,18 @@ const MapAndAvatar = ({ player, avatarPosition, isWalking }) => {
     }
   };
 
-  // 🔁 Fungsi untuk menentukan avatar yang ditampilkan
   const getAvatarImage = () => {
+    const timestamp = Date.now(); 
+    let avatarSrc = player.avatar;
+
     if (isWalking) {
-      if (player.avatar.includes('bebek')) return '/assets/bebek-walk.gif';
-      if (player.avatar.includes('ayam')) return '/assets/ayam-walk.gif';
-      if (player.avatar.includes('capi')) return '/assets/capi-walk.gif';
+      if (player.avatar.includes('bebek')) avatarSrc = `/assets/bebek-walk.gif?t=${timestamp}`;
+      else if (player.avatar.includes('ayam')) avatarSrc = `/assets/ayam-walk.gif?t=${timestamp}`;
+      else if (player.avatar.includes('capi')) avatarSrc = `/assets/capi-walk.gif?t=${timestamp}`;
     }
-    return player.avatar;
+
+    console.log("Avatar Image src:", avatarSrc); // ✅ Cek apakah gif yang dipakai benar
+    return avatarSrc;
   };
 
   return (
