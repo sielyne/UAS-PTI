@@ -1,4 +1,3 @@
-// src/App.js
 import React, { useState, useEffect, useCallback } from 'react';
 import AvatarSelection from './components/AvatarSelection';
 import GameScreen from './components/GameScreen';
@@ -26,7 +25,7 @@ const App = () => {
   const [player, setPlayer] = useState({
     name: "",
     avatar: "",
-    money: 150000,
+    money: 750000,
     happiness: 50,
     hunger: 50,
     hygiene: 50,
@@ -61,7 +60,7 @@ const App = () => {
       rewards: {
         happiness: 15,
         energy: 10,
-        inventory: { 
+        inventory: {
           'Comfort Food': { type: 'food', stock: 1 },
           'Passport': { type: 'collectible', stock: 1 }
         }
@@ -240,6 +239,12 @@ const App = () => {
       for (const [area, bounds] of Object.entries(mapAreas.MainMap)) {
         if (newX >= bounds.x[0] && newX <= bounds.x[1] &&
           newY >= bounds.y[0] && newY <= bounds.y[1]) {
+          // Check if player has enough money before transitioning
+          if (player.money < moneyCost) {
+            alert("Uang tidak cukup untuk berpindah ke lokasi ini (dibutuhkan Rp 500.000).");
+            return false; // Prevent transition
+          }
+
           setPlayer(prevPlayer => ({
             ...prevPlayer,
             location: area,
@@ -255,7 +260,7 @@ const App = () => {
       }
     }
     return false;
-  }, [player.location, mapAreas.MainMap, triggerLocationEvent]);
+  }, [player.location, player.money, mapAreas.MainMap, triggerLocationEvent]); // Added player.money to dependencies
 
   const handleMove = useCallback((direction) => {
     const energyCost = 5; // Fixed energy cost for normal movement
@@ -333,6 +338,12 @@ const App = () => {
       if (mapAreas.MainMap[targetLocation]) {
         const travelCost = 5;
         const moneyCost = 500000;
+
+        // Check if player has enough money before allowing direct travel
+        if (player.money < moneyCost) {
+          alert(`Uang tidak cukup untuk berpindah ke ${targetLocation} (dibutuhkan Rp 500.000).`);
+          return; // Prevent travel
+        }
 
         setPlayer(prevPlayer => ({
           ...prevPlayer,
@@ -659,7 +670,7 @@ const App = () => {
         case 'w':
           direction = 'up';
           break;
-        case 'arrowdown':
+        case 'down':
         case 's':
           direction = 'down';
           break;
