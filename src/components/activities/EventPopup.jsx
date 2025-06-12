@@ -1,7 +1,7 @@
 import React from "react";
-import '../../styles/EventPopup.css'; // Import file CSS
+import '../../styles/EventPopup.css'; // Import CSS file
 
-const EventPopup = ({ event, onClose }) => { // Hapus onAttemptActivity dari props
+const EventPopup = ({ event, onClose }) => { // Removed onAttemptActivity from props
   const formatRewards = (rewards) => {
     const rewardsList = [];
 
@@ -30,20 +30,20 @@ const EventPopup = ({ event, onClose }) => { // Hapus onAttemptActivity dari pro
   };
 
   const handleClosePopup = () => {
-    alert(`Untuk mendapatkan hadiah event ini, Anda harus melakukan aktivitas '${event.requiredActivity}' di menu Activities saat berada di ${event.location}!`);
-    onClose(); // Hanya menutup popup
+    alert(`To get this event's rewards, you must perform the '${event.requiredActivity}' activity in the Activities menu while in ${event.location}!`);
+    onClose(); // Only closes the popup
   };
 
   const handleGoToActivities = () => {
-    alert(`Sekarang pilih aktivitas '${event.requiredActivity}' di menu Activities untuk mengklaim hadiah di ${event.location}!`);
-    onClose(); // Hanya menutup popup, tidak langsung memberikan rewards
+    alert(`Now select the '${event.requiredActivity}' activity in the Activities menu to claim the rewards at ${event.location}!`);
+    onClose(); // Only closes the popup, does not directly grant rewards
   };
 
   return (
     <div className="event-popup-overlay">
       <div className="event-popup-container">
         <div className="event-popup-header">
-          <h2 className="event-popup-title">🎉 Event Ditemukan!</h2>
+          <h2 className="event-popup-title">🎉 Event Discovered!</h2>
           <button className="event-popup-close" onClick={handleClosePopup}>
             ✕
           </button>
@@ -51,7 +51,7 @@ const EventPopup = ({ event, onClose }) => { // Hapus onAttemptActivity dari pro
 
         <div className="event-popup-content">
           <div className="event-location">
-            <h3>Lokasi Saat Ini: {event.location}</h3>
+            <h3>Current Location: {event.location}</h3>
           </div>
 
           <div className="event-message">
@@ -59,8 +59,8 @@ const EventPopup = ({ event, onClose }) => { // Hapus onAttemptActivity dari pro
           </div>
 
           <div className="event-rewards">
-            {/* Pesan sekarang spesifik untuk requiredActivity */}
-            <h4>🎁 Hadiah (Klaim dengan aktivitas '{event.requiredActivity}' di {event.location}):</h4>
+            {/* Message is now specific to requiredActivity */}
+            <h4>🎁 Rewards (Claim by performing '{event.requiredActivity}' activity in {event.location}):</h4>
             <ul>
               {formatRewards(event.rewards).map((reward, index) => (
                 <li key={index}>{reward}</li>
@@ -71,7 +71,7 @@ const EventPopup = ({ event, onClose }) => { // Hapus onAttemptActivity dari pro
 
         <div className="event-popup-footer">
           <button className="event-popup-button" onClick={handleGoToActivities}>
-            Lihat Menu Aktivitas
+            View Activities Menu
           </button>
         </div>
       </div>
