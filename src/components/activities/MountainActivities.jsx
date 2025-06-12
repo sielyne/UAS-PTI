@@ -19,7 +19,7 @@ const MountainActivities = ({ onActivity }) => {
         <span className="info-icon" title="Hike at the Mountain to earn +30 Happiness. This action will consume -25 Energy and -15 Hunger!">
           i
         </span>
-        <button onClick={() => onActivity('Play')}>Hike</button>
+        <button onClick={() => onActivity('Hike')}>Hike</button>
       </div>
       <div className="activity-option">
         <span className="info-icon" title="Buy a souvenir at Mountain to earn +20 Happiness. This action will consume -Rp200.000!">
