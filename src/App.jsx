@@ -252,6 +252,8 @@ const App = () => {
       default:
         break;
     }
+     setIsWalking(true); // Mulai jalan
+  setTimeout(() => setIsWalking(false), 500);
 
     if (!checkAreaTransition(newX, newY)) {
       setAvatarPosition({ x: newX, y: newY });
