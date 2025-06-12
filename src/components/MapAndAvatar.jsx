@@ -20,9 +20,9 @@ const MapAndAvatar = ({ player, avatarPosition, isWalking }) => {
   // 🔁 Fungsi untuk menentukan avatar yang ditampilkan
   const getAvatarImage = () => {
     if (isWalking) {
-      if (player.avatar.includes('bebek')) return '/bebek-walk.gif';
-      if (player.avatar.includes('ayam')) return '/ayam-walk.gif';
-      if (player.avatar.includes('capi')) return '/capi-walk.gif';
+      if (player.avatar.includes('bebek')) return '/assets/bebek-walk.gif';
+      if (player.avatar.includes('ayam')) return '/assets/ayam-walk.gif';
+      if (player.avatar.includes('capi')) return '/assets/capi-walk.gif';
     }
     return player.avatar;
   };
