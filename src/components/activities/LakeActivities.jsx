@@ -19,7 +19,7 @@ const LakeActivities = ({ onActivity }) => {
         <span className="info-icon" title="Fishing at Lake to earn +25 Happiness. This action will consume -20 Energy and -10 Hygiene!">
           i
         </span>
-        <button onClick={() => onActivity('Play')}>Fishing</button>
+        <button onClick={() => onActivity('Fishing')}>Fishing</button>
       </div>
       <div className="activity-option">
         <span className="info-icon" title="Buy a souvenir at Lake to earn +20 Happiness. This action will consume -Rp200.000!">
