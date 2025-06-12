@@ -3,12 +3,12 @@ import React from 'react';
 const BeachActivities = ({ onActivity }) => {
   return (
     <>
-      <div className="activity-option">
+      {/*<div className="activity-option">
         <span className="info-icon" title="Work at Beach to earn +Rp1.000.000. This action will consume -20 Energy, -15 Hygiene, -15 Hunger!">
           i
         </span>
         <button onClick={() => onActivity('Work')}>Work</button>
-      </div>
+      </div>*/}
       <div className="activity-option">
         <span className="info-icon" title="Eat at restaurant in Beach to earn +40 Hunger, +10 Happiness and +10 Energy. This action will consume -Rp100.000!">
           i

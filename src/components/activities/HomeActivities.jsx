@@ -1,6 +1,13 @@
 import React from 'react';
 
-const HomeActivities = ({ onActivity }) => {
+// Sekarang HomeActivities menerima 'player' sebagai prop
+const HomeActivities = ({ onActivity, player }) => {
+  // Pengecekan hasFood membutuhkan objek player
+  const hasFood = Object.keys(player.inventory).some(itemName =>
+    (player.inventory[itemName].type === 'food' || player.inventory[itemName].type === 'plant') &&
+    player.inventory[itemName].stock > 0
+  );
+
   return (
     <>
       <div className="activity-option">
@@ -13,7 +20,7 @@ const HomeActivities = ({ onActivity }) => {
         <span className="info-icon" title="Eat home-cooked food to earn +30 Hunger and +5 Energy!">
           i
         </span>
-        <button onClick={() => onActivity('Eat')}>Eat</button>
+        <button onClick={() => onActivity('Eat')} disabled={!hasFood}>Eat {hasFood ? '' : '(No food)'}</button> {/* Tambahkan disabled */}
       </div>
       <div className="activity-option">
         <span className="info-icon" title="Take a bath to earn +40 Hygiene. This action will consume -5 Energy!">
@@ -26,6 +33,13 @@ const HomeActivities = ({ onActivity }) => {
           i
         </span>
         <button onClick={() => onActivity('Sleep')}>Sleep</button>
+      </div>
+      {/* Tambahkan tombol untuk Use Consumable Item jika Anda ingin mengizinkannya di Home */}
+      <div className="activity-option">
+        <span className="info-icon" title="Use a consumable item from your inventory.">
+          i
+        </span>
+        <button onClick={() => onActivity('Use Consumable Item')}>Use Consumable Item</button>
       </div>
     </>
   );
