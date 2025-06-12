@@ -27,7 +27,7 @@ const MapAndAvatar = ({ player, avatarPosition, isWalking }) => {
       else if (player.avatar.includes('capi')) avatarSrc = `/assets/capi-walk.gif?t=${timestamp}`;
     }
 
-    console.log("Avatar Image src:", avatarSrc); // ✅ Cek apakah gif yang dipakai benar
+    console.log("Avatar Image src:", avatarSrc); 
     return avatarSrc;
   };
 
