@@ -1,12 +1,19 @@
-# React + Vite
+# Anggota Kelompok:
+   # Sielyne Dwi Putri(00000111979);
+   # Cecilia Wijaya(00000112176);
+   # Cleverly Victori Aurselia Langitan(00000133646);
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# Ucup Menjelajah Nusantara: The Explorer
 
-Currently, two official plugins are available:
+## Aturan Main
+    1. Pemain harus memasukkan nama pemain dan hanya bisa memilih 1 avatar untuk memulai permainan.
+    2. Semua status bar di set sebesar 50%, pemain harus menjaga agar status bar tidak habis.
+    3. Status bar akan berkurang setiap waktu.
+    4. Pemain dapat berpindah lokasi dengan biaya tertentu.
+    5. Jumlah uang dapat digunakan untuk beraktivitas dan dapat diperoleh kembali dengan bekerja.
+    6. Jika salah satu status bar habis, avatar mati dan restart ke awal permainan.
+    7. Pemain bisa melakukan berbagai aktivitas yang berhadiahkan status bar dan uang, jika beruntung mendapatkan rewards lainnya dari Event.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Presentation Video
+    Link from YouTube
+    https://youtu.be/XokVeFW9yhI?si=rx3iZDtr_fmjIo9M
