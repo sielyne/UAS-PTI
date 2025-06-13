@@ -7,14 +7,14 @@ const MapAndAvatar = ({ player, avatarPosition, isWalking }) => {
 
   const getLocationImage = (location) => {
     switch (location) {
-      case 'Home': return '/assets/HomeMap.png';
-      case 'Mountain': return '/assets/MountainMap.png';
-      case 'Lake': return '/assets/LakeMap.png';
-      case 'Beach': return '/assets/BeachMap.png';
-      case 'Temple': return '/assets/TempleMap.png';
+      case 'Home': return '/UAS-PTI/assets/HomeMap.png';
+      case 'Mountain': return '/UAS-PTI/assets/MountainMap.png';
+      case 'Lake': return '/UAS-PTI/assets/LakeMap.png';
+      case 'Beach': return '/UAS-PTI/assets/BeachMap.png';
+      case 'Temple': return '/UAS-PTI/assets/TempleMap.png';
       case 'MainMap':
-      default: return '/assets/mainMap.jpg';
-    }
+      default: return '/UAS-PTI/assets/mainMap.jpg';
+}
   };
 
   const getAvatarImage = () => {
@@ -22,9 +22,9 @@ const MapAndAvatar = ({ player, avatarPosition, isWalking }) => {
     let avatarSrc = player.avatar;
 
     if (isWalking) {
-      if (player.avatar.includes('bebek')) avatarSrc = `/assets/bebek-walk.gif?t=${timestamp}`;
-      else if (player.avatar.includes('ayam')) avatarSrc = `/assets/ayam-walk.gif?t=${timestamp}`;
-      else if (player.avatar.includes('capi')) avatarSrc = `/assets/capi-walk.gif?t=${timestamp}`;
+      if (player.avatar.includes('bebek')) avatarSrc = `/UAS-PTI/assets/bebek-walk.gif?t=${timestamp}`;
+      else if (player.avatar.includes('ayam')) avatarSrc = `/UAS-PTI/assets/ayam-walk.gif?t=${timestamp}`;
+      else if (player.avatar.includes('capi')) avatarSrc = `/UAS-PTI/assets/capi-walk.gif?t=${timestamp}`;
     }
 
     console.log("Avatar Image src:", avatarSrc); 

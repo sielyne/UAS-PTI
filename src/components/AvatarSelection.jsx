@@ -6,10 +6,10 @@ const AvatarSelection = ({ onAvatarSelect, onStartGame }) => {
   const [playerName, setPlayerName] = useState('');
 
   const avatars = [
-    { name: 'Ayam', src: '/assets/ayam ygy.png' },
-    { name: 'Bebek', src: '/assets/bebek ygy.png' },
-    { name: 'Capybara', src: '/assets/capi ygy.png' }
-  ];
+  { name: 'Ayam', src: '/UAS-PTI/assets/ayam ygy.png' },
+  { name: 'Bebek', src: '/UAS-PTI/assets/bebek ygy.png' },
+  { name: 'Capybara', src: '/UAS-PTI/assets/capi ygy.png' }
+];
 
   const handleAvatarSelect = (avatar) => {
     setSelectedAvatar(avatar.src);
