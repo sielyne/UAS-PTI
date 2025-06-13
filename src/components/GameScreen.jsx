@@ -24,6 +24,8 @@ const GameScreen = ({
   // const gameMapColumnRef = useRef(null);
   const animationOverlayRef = useRef(null); // Ref untuk overlay animasi
 
+  
+
   // Effect untuk mengontrol display overlay
   useEffect(() => {
     if (animationOverlayRef.current) {

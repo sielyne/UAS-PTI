@@ -3,6 +3,8 @@ import '../styles/Joystick.css'; // Import CSS file
 
 const Joystick = ({ onMove }) => {
   return (
+
+    
     <div className="joystick-wrapper">
       <div className="joystick-grid">
         <div></div>

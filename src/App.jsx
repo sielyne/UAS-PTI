@@ -3,7 +3,7 @@ import AvatarSelection from './components/AvatarSelection';
 import GameScreen from './components/GameScreen';
 import GameOverScreen from './components/GameOverScreen';
 import EventPopup from './components/activities/EventPopup';
-import './index.css';
+import './index.css'; // Pastikan file CSS ini ada
 
 // --- Definisi Konstanta ---
 const ACTIVITY_GIFS = {
@@ -24,7 +24,7 @@ const ACTIVITY_GIFS = {
     'Go to Lake': '/assets/gifs/travel.gif',
     'Go to Beach': '/assets/gifs/travel.gif',
     'Go to Temple': '/assets/gifs/travel.gif',
-    'Go to MainMap': '/assets/gifs/travel.gif', // Pastikan GIF ini ada
+    'Go to MainMap': '/assets/gifs/travel.gif',
 };
 
 const CONSUMABLE_ITEM_EFFECTS = {
@@ -55,14 +55,14 @@ const LOCATION_EVENTS = {
             id: 'mainmap_merchant',
             message: 'A traveling merchant arrived! You can buy rare goods if you visit the Temple.',
             requiredActivity: 'Buy Souvenir',
-            location: 'Temple', // Ini adalah lokasi referensi untuk aktivitas, BUKAN lokasi pemicu event
+            location: 'Temple', // Lokasi di mana aktivitas harus dilakukan untuk event ini
             rewards: { money: 500000, inventory: { 'Rare Stone': { type: 'collectible', stock: 1 } } },
         },
         {
             id: 'mainmap_community_help',
             message: 'The local community needs help gathering fruits. If you help them at Home, they might reward you!',
             requiredActivity: 'Work',
-            location: 'Home', // Ini adalah lokasi referensi untuk aktivitas, BUKAN lokasi pemicu event
+            location: 'Home', // Lokasi di mana aktivitas harus dilakukan untuk event ini
             rewards: { happiness: 10, inventory: { 'Tropical Fruit': { type: 'food', stock: 2 } } },
         },
     ],
@@ -79,7 +79,7 @@ const LOCATION_EVENTS = {
                 }
             },
             requiredActivity: 'Sleep',
-            location: 'Home' // Ini adalah lokasi pemicu event
+            location: 'Home' // Lokasi pemicu event
         },
     ],
     'Temple': [
@@ -92,7 +92,7 @@ const LOCATION_EVENTS = {
                 inventory: { 'Meditation Guide': { type: 'tool', stock: 1 } }
             },
             requiredActivity: 'Pray',
-            location: 'Temple' // Ini adalah lokasi pemicu event
+            location: 'Temple' // Lokasi pemicu event
         }
     ],
     'Beach': [
@@ -105,7 +105,7 @@ const LOCATION_EVENTS = {
                 inventory: { 'Rare Seashell': { type: 'collectible', stock: 1 } }
             },
             requiredActivity: 'Swim',
-            location: 'Beach' // Ini adalah lokasi pemicu event
+            location: 'Beach' // Lokasi pemicu event
         }
     ],
     'Lake': [
@@ -118,7 +118,7 @@ const LOCATION_EVENTS = {
                 inventory: { 'Freshwater Fish': { type: 'food', stock: 1 } }
             },
             requiredActivity: 'Fishing',
-            location: 'Lake' // Ini adalah lokasi pemicu event
+            location: 'Lake' // Lokasi pemicu event
         }
     ],
     'Mountain': [
@@ -127,12 +127,12 @@ const LOCATION_EVENTS = {
             message: "The mountain view promises adventure. A discovery awaits.",
             rewards: {
                 happiness: 30,
-                energy: -10,
-                hygiene: -5,
+                energy: -10, // Example of negative effect
+                hygiene: -5, // Example of negative effect
                 inventory: { 'Mountain Herb': { type: 'plant', stock: 1 } }
             },
             requiredActivity: 'Hike',
-            location: 'Mountain' // Ini adalah lokasi pemicu event
+            location: 'Mountain' // Lokasi pemicu event
         }
     ]
 };
@@ -151,30 +151,16 @@ const App = () => {
         location: 'MainMap',
         inventory: {
             'Meat': { type: 'food', stock: 2 },
-            'Meditation Guide': { type: 'tool', stock: 1 }
+            // 'Meditation Guide': { type: 'tool', stock: 1 } // DIHAPUS DARI SINI
         },
         avatar: null,
     });
-    const resetGame = () => {
-        if (newEnergy <= 0) {
-            alert("Game Over!");
-            resetGame();
-            return;
-    }
-
-        setAvatarPosition({ x: 5, y: 5 });
-        setGameTime({ hour: 6, minute: 0 });
-        setIsWalking(false);
-        setIsActivityAnimating(false);
-        setCurrentActivityGif(null);
-        setCurrentEvent(null);
-    };
 
     const [gameTime, setGameTime] = useState({ hour: 8, minute: 0, day: 1 });
     const [avatarPosition, setAvatarPosition] = useState({ x: 50, y: 50 });
     const [isWalking, setIsWalking] = useState(false);
     const [showEventPopup, setShowEventPopup] = useState(false);
-    const [currentEvent, setCurrentEvent] = useState(null); // currentEvent sekarang akan punya properti triggerLocation
+    const [currentEvent, setCurrentEvent] = useState(null);
 
     // --- STATE UNTUK ANIMASI AKTIVITAS ---
     const [isActivityAnimating, setIsActivityAnimating] = useState(false);
@@ -185,8 +171,9 @@ const App = () => {
     const activityTimeoutRef = useRef(null);
     const pendingActivity = useRef(null);
     const walkTimeout = useRef(null);
+    // Menyimpan ID event yang sudah pernah dipicu reward-nya. Reset saat game restart.
     const triggeredEventsRef = useRef({});
-    const isReturningToMainMapRef = useRef(false);
+    const isReturningToMainMapRef = useRef(false); // Flag untuk mencegah multiple travel actions
 
     // --- Callbacks (dioptimalkan dengan useCallback) ---
     const handleSetAvatar = useCallback((avatarPath) => {
@@ -202,7 +189,10 @@ const App = () => {
             name: playerNameInput.trim() || 'Player',
         }));
         setIsAvatarSelected(true);
-    }, []);
+        // Panggil trigger event untuk lokasi awal (MainMap)
+        // Pastikan initial player state sudah lengkap saat ini
+        triggerLocationEvent('MainMap', { ...player, name: playerNameInput.trim() || 'Player' });
+    }, [player]); // player sebagai dependency untuk mendapatkan initial player state yang lengkap
 
     const decreasePlayerStatus = useCallback(() => {
         setPlayer(prevPlayer => {
@@ -215,6 +205,7 @@ const App = () => {
             const collectibles = Object.keys(prevPlayer.inventory).filter(
                 itemName => prevPlayer.inventory[itemName]?.type === 'collectible'
             );
+            // Setiap collectible meningkatkan kebahagiaan setiap jam
             if (collectibles.length > 0) {
                 newPlayer.happiness = Math.min(100, newPlayer.happiness + (collectibles.length * 1));
             }
@@ -224,15 +215,17 @@ const App = () => {
     }, []);
 
     const triggerLocationEvent = useCallback((location, currentPlayerState) => {
-        // Logika untuk mereset event yang sedang aktif saat pindah lokasi
-        // Gunakan currentEvent.triggerLocation untuk memastikan kita mereset event dari lokasi pemicu yang berbeda
-        const currentEventTriggerLocation = currentEvent ? currentEvent.triggerLocation : null;
-        if (currentEvent && currentEventTriggerLocation !== location) {
+        console.log(`%c[triggerLocationEvent] Checking events for location: ${location}`, 'color: purple;');
+
+        // Jika ada event yang sedang aktif dan bukan event yang sama dengan lokasi saat ini, reset.
+        // Ini mencegah event dari lokasi lama tetap aktif setelah pindah.
+        if (currentEvent && currentEvent.triggerLocation !== location) {
+            console.log(`%c[triggerLocationEvent] Clearing old event (ID: ${currentEvent.id}) because location changed from ${currentEvent.triggerLocation} to ${location}.`, 'color: orange;');
             setShowEventPopup(false);
-            setCurrentEvent(null);
+            setCurrentEvent(null); // Penting untuk mengosongkan currentEvent
         }
 
-        const potentialEvents = LOCATION_EVENTS[location]; // Mendapatkan event berdasarkan KUNCI lokasi saat ini
+        const potentialEvents = LOCATION_EVENTS[location];
         if (potentialEvents && potentialEvents.length > 0) {
             const availableEvents = potentialEvents.filter(event =>
                 !triggeredEventsRef.current[event.id] && (!event.condition || event.condition(currentPlayerState))
@@ -240,53 +233,93 @@ const App = () => {
 
             if (availableEvents.length > 0) {
                 const randomEvent = availableEvents[Math.floor(Math.random() * availableEvents.length)];
+                console.log(`%c[triggerLocationEvent] Found new event for ${location}: ${randomEvent.id}`, 'color: green;');
                 // Simpan event yang terpilih, dan tambahkan properti triggerLocation
-                // Ini memastikan kita tahu di lokasi mana event ini *sebenarnya* dipicu
-                setCurrentEvent({ ...randomEvent, triggerLocation: location }); // <--- PERUBAHAN UTAMA DI SINI
+                setCurrentEvent({ ...randomEvent, triggerLocation: location });
                 setShowEventPopup(true);
             } else {
-                setCurrentEvent(null);
+                console.log(`%c[triggerLocationEvent] No new available events for ${location}.`, 'color: gray;');
+                setCurrentEvent(null); // Penting: reset currentEvent jika tidak ada event baru
                 setShowEventPopup(false);
             }
         } else {
-            setCurrentEvent(null);
+            console.log(`%c[triggerLocationEvent] No potential events defined for ${location}.`, 'color: gray;');
+            setCurrentEvent(null); // Penting: reset currentEvent jika tidak ada event potensial
             setShowEventPopup(false);
         }
-    }, [currentEvent]); // currentEvent masih dependency untuk pengecekan awal
+    }, [currentEvent]); // currentEvent perlu ada di dependency list karena dipakai di awal fungsi
 
     const applyEventRewards = useCallback(() => {
+        console.log("%c--- ENTERING applyEventRewards ---", 'background: #222; color: #bada55');
         if (currentEvent && currentEvent.rewards) {
+            console.log(`%cApplying rewards for event ID: ${currentEvent.id}`, 'color: blue;');
+            console.log("Event details:", currentEvent);
+            console.log("Rewards to apply:", currentEvent.rewards);
+
             setPlayer(prevPlayer => {
+                console.log("Player state BEFORE rewards application:", { ...prevPlayer });
+
                 let newPlayer = { ...prevPlayer };
                 const rewards = currentEvent.rewards;
 
-                if (rewards.happiness !== undefined) { newPlayer.happiness = Math.min(100, Math.max(0, prevPlayer.happiness + rewards.happiness)); }
-                if (rewards.energy !== undefined) { newPlayer.energy = Math.min(100, Math.max(0, prevPlayer.energy + rewards.energy)); }
-                if (rewards.hunger !== undefined) { newPlayer.hunger = Math.min(100, Math.max(0, prevPlayer.hunger + rewards.hunger)); }
-                if (rewards.hygiene !== undefined) { newPlayer.hygiene = Math.min(100, Math.max(0, prevPlayer.hygiene + rewards.hygiene)); }
-                if (rewards.money !== undefined) { newPlayer.money = prevPlayer.money + rewards.money; }
+                if (rewards.happiness !== undefined) {
+                    newPlayer.happiness = Math.min(100, Math.max(0, prevPlayer.happiness + rewards.happiness));
+                    console.log(`  - Applied Happiness: ${rewards.happiness} (new: ${newPlayer.happiness})`);
+                }
+                if (rewards.energy !== undefined) {
+                    newPlayer.energy = Math.min(100, Math.max(0, prevPlayer.energy + rewards.energy));
+                    console.log(`  - Applied Energy: ${rewards.energy} (new: ${newPlayer.energy})`);
+                }
+                if (rewards.hunger !== undefined) {
+                    // Jika rewards.hunger bernilai positif, berarti itu menambahkan hunger (mengurangi rasa lapar)
+                    // Jika rewards.hunger bernilai negatif, berarti mengurangi hunger (menambah rasa lapar)
+                    newPlayer.hunger = Math.min(100, Math.max(0, prevPlayer.hunger + rewards.hunger));
+                    console.log(`  - Applied Hunger: ${rewards.hunger} (new: ${newPlayer.hunger})`);
+                }
+                if (rewards.hygiene !== undefined) {
+                    newPlayer.hygiene = Math.min(100, Math.max(0, prevPlayer.hygiene + rewards.hygiene));
+                    console.log(`  - Applied Hygiene: ${rewards.hygiene} (new: ${newPlayer.hygiene})`);
+                }
+                if (rewards.money !== undefined) {
+                    newPlayer.money = prevPlayer.money + rewards.money;
+                    console.log(`  - Applied Money: ${rewards.money.toLocaleString()} (new: ${newPlayer.money.toLocaleString()})`);
+                }
 
                 if (rewards.inventory) {
                     newPlayer.inventory = { ...prevPlayer.inventory };
+                    console.log("  - Applying Inventory Rewards:");
                     Object.entries(rewards.inventory).forEach(([item, data]) => {
+                        const currentStock = newPlayer.inventory[item]?.stock || 0;
+                        const newStock = currentStock + data.stock;
                         newPlayer.inventory[item] = {
                             ...newPlayer.inventory[item],
                             type: data.type || 'unknown',
-                            stock: (newPlayer.inventory[item]?.stock || 0) + data.stock
+                            stock: newStock
                         };
+                        console.log(`    - Item: ${item}, Old Stock: ${currentStock}, New Stock: ${newStock}`);
                     });
                 }
+
+                console.log("Player state AFTER rewards calculation:", { ...newPlayer });
                 return newPlayer;
             });
-            // Mark event as triggered using its original ID
+
+            // Tandai event ini sudah dipicu reward-nya SETELAH reward diterapkan
             triggeredEventsRef.current = { ...triggeredEventsRef.current, [currentEvent.id]: true };
+            console.log(`%cEvent marked as triggered in triggeredEventsRef: ${currentEvent.id}`, 'color: brown;');
+
             setShowEventPopup(false);
-            setCurrentEvent(null);
+            setCurrentEvent(null); // Clear current event after rewards applied
+            console.log("%cEvent popup closed and currentEvent state cleared.", 'color: blue;');
+
+        } else {
+            console.warn("%capplyEventRewards called but currentEvent or currentEvent.rewards is missing or null.", 'color: red;', { currentEvent });
         }
-    }, [currentEvent, setPlayer]);
+        console.log("%c--- EXITTING applyEventRewards ---", 'background: #222; color: #bada55');
+    }, [currentEvent]); // currentEvent adalah dependency karena kita membaca propertinya
 
     const handleMove = useCallback((direction) => {
-        if (isActivityAnimating) return;
+        if (isActivityAnimating) return; // Tidak bisa bergerak saat animasi aktivitas berjalan
         if (player.energy < 1) {
             alert("You don't have enough energy to move!");
             setIsWalking(false);
@@ -308,7 +341,7 @@ const App = () => {
         setAvatarPosition({ x: newX, y: newY });
         setPlayer(prevPlayer => ({
             ...prevPlayer,
-            energy: Math.max(0, prevPlayer.energy - 1)
+            energy: Math.max(0, prevPlayer.energy - 1) // Mengurangi energy setiap kali bergerak
         }));
 
         setIsWalking(true);
@@ -319,6 +352,7 @@ const App = () => {
 
     const handleBackToMainMap = useCallback(() => {
         if (isActivityAnimating) return;
+        if (isReturningToMainMapRef.current) return; // Mencegah pemanggilan ganda
 
         const travelEnergyCost = 15;
         const travelMoneyCost = 50000;
@@ -332,16 +366,14 @@ const App = () => {
             return;
         }
 
-        if (isReturningToMainMapRef.current) return;
-        isReturningToMainMapRef.current = true;
+        isReturningToMainMapRef.current = true; // Set flag
 
-        // --- TAMBAHKAN DUA BARIS INI DI SINI ---
+        // Clear event popup saat bepergian ke MainMap
         setShowEventPopup(false);
-        setCurrentEvent(null);
-        // --- AKHIR PENAMBAHAN ---
+        setCurrentEvent(null); // Clear current event saat melakukan perjalanan
 
         const performBackToMainMapEffect = (prevPlayer) => {
-            if (prevPlayer.location === 'MainMap') {
+            if (prevPlayer.location === 'MainMap') { // Jika sudah di MainMap, tidak perlu efek travel
                 return prevPlayer;
             }
             return {
@@ -361,6 +393,7 @@ const App = () => {
             alertMessage: `You returned to Main Map. -${travelEnergyCost} Energy, -Rp${travelMoneyCost.toLocaleString()} Money, +5 Happiness.`,
             isLocationChange: true
         };
+        console.log(`%c[handleBackToMainMap] Starting travel to MainMap. Pending activity: ${pendingActivity.current.activityName}`, 'color: lightblue;');
 
         activityTimeoutRef.current = setTimeout(() => {
             setIsActivityAnimating(false);
@@ -368,14 +401,15 @@ const App = () => {
             if (pendingActivity.current) {
                 const { activityName: completedActivityName, effectToApply: completedEffect, alertMessage: finalAlertMessage, isLocationChange: isCompletedLocationChange } = pendingActivity.current;
 
+                let finalPlayerStateAfterEffect = null; // Variable to hold the player state after applying effects
+
                 if (completedEffect) {
                     setPlayer(prevPlayer => {
                         const updatedPlayer = completedEffect(prevPlayer);
+                        finalPlayerStateAfterEffect = updatedPlayer; // Capture the updated state
                         if (isCompletedLocationChange && updatedPlayer.location !== prevPlayer.location) {
                             setAvatarPosition({ x: 50, y: 50 });
-                            // Dua baris ini sekarang bisa dihapus karena sudah dipindahkan ke atas
-                            // setCurrentEvent(null);
-                            // setShowEventPopup(false);
+                            // Trigger event for the new location (MainMap)
                             triggerLocationEvent(updatedPlayer.location, updatedPlayer);
                         }
                         return updatedPlayer;
@@ -383,19 +417,60 @@ const App = () => {
                 }
                 if (finalAlertMessage) alert(finalAlertMessage);
 
-                isReturningToMainMapRef.current = false;
+                // Setelah efek diterapkan dan state player diperbarui, baru lakukan pengecekan event
+                // Pastikan menggunakan state player yang paling baru atau yang sudah di-update
+                const locationForEventCheck = finalPlayerStateAfterEffect ? finalPlayerStateAfterEffect.location : player.location;
+                console.log(`%c[handleBackToMainMap] Activity completed: ${completedActivityName}. Location for event check: ${locationForEventCheck}`, 'color: lightblue;');
+
+
+                // Event check logic remains the same, but now uses the correct `locationForEventCheck`
+                // Logika ini untuk memastikan event reward DITERAPKAN jika kondisi terpenuhi
+                if (currentEvent && // Pastikan ada event yang aktif
+                    currentEvent.requiredActivity === completedActivityName && // Aktivitas yang selesai cocok
+                    !triggeredEventsRef.current[currentEvent.id] && // Event belum pernah dipicu rewardnya
+                    currentEvent.location === locationForEventCheck // Lokasi event cocok dengan lokasi pemain saat ini
+                ) {
+                    console.log("%c[handleBackToMainMap] Conditions met for applyEventRewards after returning to MainMap.", 'color: green;');
+                    applyEventRewards();
+                } else if (currentEvent) {
+                    console.log("%c[handleBackToMainMap] Event conditions NOT met or event already triggered after returning to MainMap. Details:", 'color: orange;');
+                    console.log("  - currentEvent ID:", currentEvent.id);
+                    console.log("  - currentEvent.requiredActivity:", currentEvent.requiredActivity, "vs completedActivityName:", completedActivityName);
+                    console.log("  - !triggeredEventsRef.current[currentEvent.id]:", !triggeredEventsRef.current[currentEvent.id]);
+                    console.log("  - currentEvent.location:", currentEvent.location, "vs locationForEventCheck:", locationForEventCheck);
+
+                    // Jika event yang sedang aktif tidak relevan dengan lokasi saat ini (misal event Home tapi player di MainMap)
+                    // atau event yang aktif bukan event yang memerlukan aktivitas yang baru saja diselesaikan.
+                    if (currentEvent.location !== locationForEventCheck) {
+                        console.log("%c[handleBackToMainMap] Clearing current event because player's location doesn't match event's trigger location.", 'color: orange;');
+                        setCurrentEvent(null);
+                        setShowEventPopup(false);
+                    }
+                }
+
+                isReturningToMainMapRef.current = false; // Reset flag
                 pendingActivity.current = null;
             }
-        }, 7000);
-    }, [player, setPlayer, triggerLocationEvent, isActivityAnimating]);
-    
+        }, 7000); // Durasi travel
+    }, [player, setPlayer, triggerLocationEvent, isActivityAnimating, currentEvent, applyEventRewards]);
+
+
     const handleActivity = useCallback((activityName, duration = 7000) => {
-        if (isActivityAnimating) return;
+        if (isActivityAnimating) return; // Mencegah aktivitas ganda
+
+        // --- TAMBAH LOG INI DI SINI ---
+        console.log(`%c[handleActivity] Starting activity: ${activityName}`, 'color: lightblue;');
+        console.log(`%c[handleActivity] Current event state before activity:`, 'color: lightblue;', currentEvent);
+        console.log(`%c[handleActivity] Player location before activity: ${player.location}`, 'color: lightblue;');
+        // --- END TAMBAH LOG ---
 
         let alertMessage = "";
         let activityCostMet = true;
         let effectToApply = null;
         let isLocationChangeActivity = false;
+
+        // Simpan lokasi saat aktivitas dimulai untuk referensi event
+        const initialPlayerLocation = player.location; // Ini digunakan untuk event-check jika tidak ada perubahan lokasi
 
         switch (activityName) {
             case 'Work':
@@ -424,7 +499,7 @@ const App = () => {
                     itemToUse = prompt(`Select an item to use (available: ${availableConsumableItems.join(', ')}):`);
                     if (!itemToUse || !availableConsumableItems.includes(itemToUse)) { alertMessage = "Invalid choice or item not available."; activityCostMet = false; break; }
                 } else if (activityName === 'Eat' && player.location === 'Home') {
-                    if (availableConsumableItems.length > 0) { itemToUse = availableConsumableItems[0]; }
+                    if (availableConsumableItems.length > 0) { itemToUse = availableConsumableItems[0]; } // Gunakan item pertama jika ada
                     else { alertMessage = "You don't have any food to eat at home! Try buying some or fishing."; activityCostMet = false; break; }
                 } else if (activityName === 'Eat' && player.location !== 'Home') {
                     const restaurantCost = 100000;
@@ -458,49 +533,149 @@ const App = () => {
                     alertMessage = msg;
                 } else { activityCostMet = false; }
                 break;
-            case 'Swim':
-                const swimEnergyCost = 20; const swimHygieneCost = 10;
-                if (player.location !== 'Beach') { alertMessage = `You can only swim at the Beach!`; activityCostMet = false; }
-                else if (player.energy < swimEnergyCost) { alertMessage = `You don't have enough energy (${swimEnergyCost}) to swim!`; activityCostMet = false; }
-                else {
-                    effectToApply = (prevPlayer) => ({ ...prevPlayer, happiness: Math.min(100, prevPlayer.happiness + 25), energy: Math.max(0, prevPlayer.energy - swimEnergyCost), hygiene: Math.max(0, prevPlayer.hygiene - swimHygieneCost), });
-                    alertMessage = `You swam at ${player.location}. +25 Happiness, -${swimEnergyCost} Energy, -${swimHygieneCost} Hygiene.`;
-                }
-                break;
-            case 'Fishing':
-                const fishEnergyCost = 20; const fishHygieneCost = 10;
-                if (player.location !== 'Lake') { alertMessage = `You can only fish at the Lake!`; activityCostMet = false; }
-                else if (player.energy < fishEnergyCost) { alertMessage = `You don't have enough energy (${fishEnergyCost}) to fish!`; activityCostMet = false; }
-                else {
-                    effectToApply = (prevPlayer) => ({ ...prevPlayer, happiness: Math.min(100, prevPlayer.happiness + 25), energy: Math.max(0, prevPlayer.energy - fishEnergyCost), hygiene: Math.max(0, prevPlayer.hygiene - fishHygieneCost), inventory: { ...prevPlayer.inventory, 'Fish': { type: 'food', stock: (prevPlayer.inventory['Fish']?.stock || 0) + 1 } } });
-                    alertMessage = `You fished at ${player.location}. +25 Happiness, -${fishEnergyCost} Energy, -${fishHygieneCost} Hygiene, +1 Fish.`;
-                }
-                break;
-            case 'Hike':
-                const hikeEnergyCost = 25; const hikeHungerCost = 15;
-                if (player.location !== 'Mountain') { alertMessage = `You can only hike in the Mountains!`; activityCostMet = false; }
-                else if (player.energy < hikeEnergyCost) { alertMessage = `You don't have enough energy (${hikeEnergyCost}) to hike!`; activityCostMet = false; }
-                else {
-                    effectToApply = (prevPlayer) => ({ ...prevPlayer, happiness: Math.min(100, prevPlayer.happiness + 30), energy: Math.max(0, prevPlayer.energy - hikeEnergyCost), hunger: Math.max(0, prevPlayer.hunger - hikeHungerCost), });
-                    alertMessage = `You hiked in the Mountains. +30 Happiness, -${hikeEnergyCost} Energy, -${hikeHungerCost} Hunger.`;
-                }
-                break;
-            case 'Sleep':
-                const sleepEnergyGain = 50;
-                if (player.location !== 'Home') { alertMessage = "You can only sleep at home!"; activityCostMet = false; }
-                else {
-                    effectToApply = (prevPlayer) => {
-                        setGameTime(prevTime => {
-                            let newHour = prevTime.hour + 6;
-                            let newDay = prevTime.day;
-                            if (newHour >= 24) { newDay += Math.floor(newHour / 24); newHour %= 24; }
-                            return { ...prevTime, hour: newHour, minute: 0, day: newDay };
-                        });
-                        return { ...prevPlayer, energy: Math.min(100, prevPlayer.energy + sleepEnergyGain) };
-                    };
-                    alertMessage = "You slept. +50 Energy, 6 hours passed.";
-                }
-                break;
+            // ... di dalam fungsi handleActivity ...
+
+case 'Swim':
+    const swimEnergyCost = 20;
+    const swimHygieneCost = 10;
+    if (player.location !== 'Beach') {
+        alertMessage = `You can only swim at the Beach!`;
+        activityCostMet = false;
+    } else if (player.energy < swimEnergyCost) {
+        alertMessage = `You don't have enough energy (${swimEnergyCost}) to swim!`;
+        activityCostMet = false;
+    } else {
+        effectToApply = (prevPlayer) => ({
+            ...prevPlayer,
+            happiness: Math.min(100, prevPlayer.happiness + 25),
+            energy: Math.max(0, prevPlayer.energy - swimEnergyCost),
+            hygiene: Math.max(0, prevPlayer.hygiene - swimHygieneCost),
+        });
+
+        // Event: Ocean Treasure (memberikan Seashell, Money, Happiness)
+        if (currentEvent && currentEvent.id === 'beach_treasure' && !triggeredEventsRef.current['beach_treasure']) {
+            alertMessage = "The waves kissed your feet. Suddenly, your eyes caught a glimmer at the bottom of the sea! You gained +20 Happiness, +Rp300,000 Money, and found a Seashell!";
+        } else {
+            // Pesan default jika tidak ada event yang terpicu atau event sudah selesai
+            alertMessage = `You swam at ${player.location}. +25 Happiness, -${swimEnergyCost} Energy, -${swimHygieneCost} Hygiene.`;
+        }
+    }
+    break;
+
+case 'Fishing':
+    const fishEnergyCost = 20;
+    const fishHygieneCost = 10;
+    if (player.location !== 'Lake') {
+        alertMessage = `You can only fish at the Lake!`;
+        activityCostMet = false;
+    } else if (player.energy < fishEnergyCost) {
+        alertMessage = `You don't have enough energy (${fishEnergyCost}) to fish!`;
+        activityCostMet = false;
+    } else {
+        effectToApply = (prevPlayer) => ({
+            ...prevPlayer,
+            happiness: Math.min(100, prevPlayer.happiness + 25),
+            energy: Math.max(0, prevPlayer.energy - fishEnergyCost),
+            hygiene: Math.max(0, prevPlayer.hygiene - fishHygieneCost),
+            inventory: { ...prevPlayer.inventory, 'Fish': { type: 'food', stock: (prevPlayer.inventory['Fish']?.stock || 0) + 1 } }
+        });
+
+        // Event: Legendary Catch (memberikan Freshwater Fish, Happiness, Hunger)
+        if (currentEvent && currentEvent.id === 'legendary_catch' && !triggeredEventsRef.current['legendary_catch']) {
+            alertMessage = `You spent time fishing at the lake. The sun set, and you successfully caught a fish! You gained +18 Happiness, +15 Hunger, and gained a Freshwater Fish!`;
+        } else {
+            // Pesan default jika tidak ada event yang terpicu atau event sudah selesai
+            alertMessage = `You fished at ${player.location}. +25 Happiness, -${fishEnergyCost} Energy, -${fishHygieneCost} Hygiene, +1 Fish.`;
+        }
+    }
+    break;
+
+case 'Hike':
+    const hikeEnergyCost = 25;
+    const hikeHungerCost = 15;
+    if (player.location !== 'Mountain') {
+        alertMessage = `You can only hike in the Mountains!`;
+        activityCostMet = false;
+    } else if (player.energy < hikeEnergyCost) {
+        alertMessage = `You don't have enough energy (${hikeEnergyCost}) to hike!`;
+        activityCostMet = false;
+    } else {
+        effectToApply = (prevPlayer) => ({
+            ...prevPlayer,
+            happiness: Math.min(100, prevPlayer.happiness + 30),
+            energy: Math.max(0, prevPlayer.energy - hikeEnergyCost),
+            hunger: Math.max(0, prevPlayer.hunger - hikeHungerCost),
+        });
+
+        // Event: Mountain Herb Discovery (memberikan Mountain Herb)
+        if (currentEvent && currentEvent.id === 'mountain_herb_discovery' && !triggeredEventsRef.current['mountain_herb_discovery']) {
+            alertMessage = "Your mountain journey brought a blessing! Besides enjoying the view (+30 Happiness, -10 Energy, -5 Hygiene), you stumbled upon a Mountain Herb never seen before!";
+        } else {
+            // Pesan default jika tidak ada event yang terpicu atau event sudah selesai
+            alertMessage = `You hiked in the Mountains. +30 Happiness, -${hikeEnergyCost} Energy, -${hikeHungerCost} Hunger.`;
+        }
+    }
+    break;
+
+case 'Sleep':
+    const sleepEnergyGain = 50;
+    if (player.location !== 'Home') {
+        alertMessage = "You can only sleep at home!";
+        activityCostMet = false;
+    } else {
+        effectToApply = (prevPlayer) => {
+            setGameTime(prevTime => {
+                let newHour = prevTime.hour + 6;
+                let newDay = prevTime.day;
+                if (newHour >= 24) { newDay += Math.floor(newHour / 24); newHour %= 24; }
+                return { ...prevTime, hour: newHour, minute: 0, day: newDay };
+            });
+            return { ...prevPlayer, energy: Math.min(100, prevPlayer.energy + sleepEnergyGain) };
+        };
+
+        // Event: Sweet Dreams (memberikan Happiness, Energy, Passport)
+        if (currentEvent && currentEvent.id === 'sweet_dreams' && !triggeredEventsRef.current['sweet_dreams']) {
+            alertMessage = "Sweet dreams found you! A deep sleep restored +15 Happiness, +10 Energy and you found a Passport!";
+        } else {
+            // Pesan default jika tidak ada event yang terpicu atau event sudah selesai
+            alertMessage = "You slept. +50 Energy, 6 hours passed.";
+        }
+    }
+    break;
+
+case 'Pray':
+    const prayEnergyCost = 10;
+    if (player.location !== 'Temple') {
+        alertMessage = "You can only pray at the Temple!";
+        activityCostMet = false;
+    } else if (player.energy < prayEnergyCost) {
+        alertMessage = `You don't have enough energy (${prayEnergyCost}) to pray!`;
+        activityCostMet = false;
+    } else {
+        let happinessBonus = 0;
+        let energyBonus = 0;
+        if (player.inventory['Meditation Guide'] && player.inventory['Meditation Guide'].stock > 0) {
+            if (NON_CONSUMABLE_ITEM_EFFECTS['Meditation Guide']?.activityBonus?.['Pray']) {
+                happinessBonus = NON_CONSUMABLE_ITEM_EFFECTS['Meditation Guide'].activityBonus['Pray'].happiness || 0;
+                energyBonus = NON_CONSUMABLE_ITEM_EFFECTS['Meditation Guide'].activityBonus['Pray'].energy || 0;
+            }
+        }
+        effectToApply = (prevPlayer) => ({
+            ...prevPlayer,
+            happiness: Math.min(100, prevPlayer.happiness + 30 + happinessBonus),
+            energy: Math.min(100, prevPlayer.energy - prayEnergyCost + energyBonus),
+        });
+
+        // Event: Temple Reflection (memberikan Happiness, Energy, Meditation Guide)
+        if (currentEvent && currentEvent.id === 'temple_reflection' && !triggeredEventsRef.current['temple_reflection']) {
+            alertMessage = `Your prayers are answered! Your spirit feels enlightened. You gained +25 Happiness, +15 Energy, and found a Meditation Guide! You feel deeply refreshed!`;
+        } else {
+            // Pesan default jika tidak ada event yang terpicu atau event sudah selesai
+            alertMessage = `You prayed at the Temple. +${30 + happinessBonus} Happiness, -${prayEnergyCost - energyBonus} Energy.${happinessBonus > 0 || energyBonus > 0 ? ' (Meditation Guide blessing!)' : ''}`;
+        }
+    }
+    break;
+                
             case 'Take a Bath':
                 const bathHygieneGain = 40; const bathEnergyCost = 5;
                 if (player.location !== 'Home') { alertMessage = "You can only take a bath at home!"; activityCostMet = false; }
@@ -530,22 +705,7 @@ const App = () => {
                     alertMessage = `You explored ${player.location}. +25 Happiness, -${exploreEnergyCost} Energy, -${exploreHygieneCost} Hygiene.`;
                 }
                 break;
-            case 'Pray':
-                const prayEnergyCost = 10;
-                if (player.location !== 'Temple') { alertMessage = "You can only pray at the Temple!"; activityCostMet = false; }
-                else if (player.energy < prayEnergyCost) { alertMessage = `You don't have enough energy (${prayEnergyCost}) to pray!`; activityCostMet = false; }
-                else {
-                    let happinessBonus = 0; let energyBonus = 0;
-                    if (player.inventory['Meditation Guide'] && player.inventory['Meditation Guide'].stock > 0) {
-                        if (NON_CONSUMABLE_ITEM_EFFECTS['Meditation Guide']?.activityBonus?.['Pray']) {
-                            happinessBonus = NON_CONSUMABLE_ITEM_EFFECTS['Meditation Guide'].activityBonus['Pray'].happiness || 0;
-                            energyBonus = NON_CONSUMABLE_ITEM_EFFECTS['Meditation Guide'].activityBonus['Pray'].energy || 0;
-                        }
-                    }
-                    effectToApply = (prevPlayer) => ({ ...prevPlayer, happiness: Math.min(100, prevPlayer.happiness + 30 + happinessBonus), energy: Math.min(100, prevPlayer.energy - prayEnergyCost + energyBonus), });
-                    alertMessage = `You prayed at the Temple. +${30 + happinessBonus} Happiness, -${prayEnergyCost - energyBonus} Energy.${happinessBonus > 0 || energyBonus > 0 ? ' (Meditation Guide blessing!)' : ''}`;
-                }
-                break;
+            
             case 'Go to Home':
             case 'Go to Mountain':
             case 'Go to Lake':
@@ -556,7 +716,7 @@ const App = () => {
                 // Handle travel from MainMap to sub-location
                 if (player.location === 'MainMap' && MAP_AREAS.MainMap[targetLocation]) {
                     const travelEnergyCost = 15;
-                    const travelMoneyCost = 500000;
+                    const travelMoneyCost = 250000;
                     if (player.money < travelMoneyCost) { alertMessage = `Insufficient money to travel to ${targetLocation} (Rp ${travelMoneyCost.toLocaleString()} required).`; activityCostMet = false; }
                     else if (player.energy < travelEnergyCost) { alertMessage = `You don't have enough energy (${travelEnergyCost}) to travel to ${targetLocation}!`; activityCostMet = false; }
                     else {
@@ -586,20 +746,30 @@ const App = () => {
         if (gif) {
             setCurrentActivityGif(gif);
             setIsActivityAnimating(true);
-            pendingActivity.current = { activityName, effectToApply, alertMessage, isLocationChange: isLocationChangeActivity }; // Simpan flag
+            // Simpan lokasi awal pemain di pendingActivity
+            pendingActivity.current = { activityName, effectToApply, alertMessage, isLocationChange: isLocationChangeActivity, initialPlayerLocation: player.location };
+            console.log(`%c[handleActivity] Starting animation for: ${activityName} from ${player.location}.`, 'color: lightblue;');
+
 
             activityTimeoutRef.current = setTimeout(() => {
                 if (pendingActivity.current) {
-                    const { activityName: completedActivityName, effectToApply: completedEffect, alertMessage: finalAlertMessage, isLocationChange: isCompletedLocationChange } = pendingActivity.current;
+                    const { activityName: completedActivityName, effectToApply: completedEffect, alertMessage: finalAlertMessage, isLocationChange: isCompletedLocationChange, initialPlayerLocation } = pendingActivity.current;
+
+                    let finalPlayerStateAfterEffect = null; // Variabel untuk menyimpan state player setelah effectToApply
 
                     if (completedEffect) {
                         setPlayer(prevPlayer => {
                             const updatedPlayer = completedEffect(prevPlayer);
+                            finalPlayerStateAfterEffect = updatedPlayer; // Tangkap state yang sudah diupdate
                             // Logika untuk perubahan lokasi setelah efek diterapkan
                             if (isCompletedLocationChange && updatedPlayer.location !== prevPlayer.location) {
                                 setAvatarPosition({ x: 50, y: 50 });
+                                // **Penting:** Clear event sebelumnya HANYA JIKA lokasi berubah.
+                                // Jika lokasi tidak berubah, kita ingin `currentEvent` tetap ada untuk pengecekan reward.
+                                // Jika lokasi berubah, kita harus memicu event baru di lokasi baru.
                                 setCurrentEvent(null);
                                 setShowEventPopup(false);
+                                // Trigger event for the NEW location (updatedPlayer.location)
                                 triggerLocationEvent(updatedPlayer.location, updatedPlayer);
                             }
                             return updatedPlayer;
@@ -607,17 +777,42 @@ const App = () => {
                     }
                     if (finalAlertMessage) alert(finalAlertMessage);
 
-                    // Pengecekan event hanya jika BUKAN perubahan lokasi
-                    // Atau jika event itu adalah event yang dipicu di lokasi saat ini
+                    console.log(`%c[handleActivity] Activity completed: ${completedActivityName}`, 'color: blue;');
+                    console.log(`%c[handleActivity] currentEvent state after activity completion (before final check):`, 'color: blue;', currentEvent);
+
+
+                    // Tentukan lokasi yang akan digunakan untuk pengecekan event.
+                    // Jika aktivitas adalah perubahan lokasi, gunakan lokasi BARU (dari finalPlayerStateAfterEffect).
+                    // Jika bukan perubahan lokasi, gunakan lokasi pemain SAAT INI (yang sudah diupdate oleh setPlayer),
+                    // atau gunakan initialPlayerLocation jika tidak ada perubahan lokasi.
+                    const locationForEventCheck = finalPlayerStateAfterEffect ? finalPlayerStateAfterEffect.location : initialPlayerLocation;
+                    console.log(`%c[handleActivity] Location for event check: ${locationForEventCheck}. Initial activity location: ${initialPlayerLocation}`, 'color: blue;');
+
+
+                    // Pengecekan event reward:
+                    // currentEvent harus ada, aktivitas yang selesai cocok, event belum dipicu rewardnya,
+                    // DAN lokasi event (tempat event itu muncul) cocok dengan lokasi pemain saat ini.
                     if (currentEvent &&
-                        (currentEvent.triggerLocation === player.location || !isCompletedLocationChange) && // Cek triggerLocation atau bukan perpindahan lokasi
                         currentEvent.requiredActivity === completedActivityName &&
-                        !triggeredEventsRef.current[currentEvent.id]
+                        !triggeredEventsRef.current[currentEvent.id] &&
+                        currentEvent.location === locationForEventCheck // Pastikan lokasi event match dengan lokasi pemain saat ini
                     ) {
+                        console.log("%c[handleActivity] Event conditions met. Calling applyEventRewards.", 'background: #00FF00; color: black;');
                         applyEventRewards();
-                    } else if (currentEvent && currentEvent.triggerLocation !== player.location) { // Jika event tidak relevan dengan lokasi sekarang
-                        setCurrentEvent(null);
-                        setShowEventPopup(false);
+                    } else if (currentEvent) {
+                        console.log("%c[handleActivity] Event conditions NOT met or event already triggered. Details:", 'color: orange;');
+                        console.log("  - currentEvent ID:", currentEvent.id);
+                        console.log("  - currentEvent.requiredActivity:", currentEvent.requiredActivity, "vs completedActivityName:", completedActivityName);
+                        console.log("  - !triggeredEventsRef.current[currentEvent.id]:", !triggeredEventsRef.current[currentEvent.id]);
+                        console.log("  - currentEvent.location:", currentEvent.location, "vs locationForEventCheck:", locationForEventCheck);
+
+                        // Jika event yang sedang aktif tidak relevan dengan lokasi saat ini (misal event Home tapi player di Temple)
+                        // atau event yang aktif bukan event yang memerlukan aktivitas yang baru saja diselesaikan.
+                        if (currentEvent.location !== locationForEventCheck) {
+                            console.log("%c[handleActivity] Clearing current event because player's location doesn't match event's trigger location.", 'color: orange;');
+                            setCurrentEvent(null);
+                            setShowEventPopup(false);
+                        }
                     }
 
                     pendingActivity.current = null;
@@ -626,9 +821,11 @@ const App = () => {
                 setCurrentActivityGif(null);
             }, duration);
         } else { // No GIF, immediate effect
+            let finalPlayerStateAfterEffect = null;
             if (effectToApply) {
                 setPlayer(prevPlayer => {
                     const updatedPlayer = effectToApply(prevPlayer);
+                    finalPlayerStateAfterEffect = updatedPlayer;
                     if (isLocationChangeActivity && updatedPlayer.location !== prevPlayer.location) {
                         setAvatarPosition({ x: 50, y: 50 });
                         setCurrentEvent(null);
@@ -640,71 +837,108 @@ const App = () => {
             }
             if (alertMessage) alert(alertMessage);
 
+            const locationForEventCheck = finalPlayerStateAfterEffect ? finalPlayerStateAfterEffect.location : initialPlayerLocation;
+            console.log(`%c[handleActivity - No GIF] Activity completed: ${activityName}. Location for event check: ${locationForEventCheck}`, 'color: blue;');
+
             if (currentEvent &&
-                (currentEvent.triggerLocation === player.location || !isLocationChangeActivity) && // Cek triggerLocation atau bukan perpindahan lokasi
                 currentEvent.requiredActivity === activityName &&
-                !triggeredEventsRef.current[currentEvent.id]
+                !triggeredEventsRef.current[currentEvent.id] &&
+                currentEvent.location === locationForEventCheck
             ) {
+                console.log("%c[handleActivity - No GIF] Event conditions met. Calling applyEventRewards.", 'background: #00FF00; color: black;');
                 applyEventRewards();
-            } else if (currentEvent && currentEvent.triggerLocation !== player.location) { // Jika event tidak relevan dengan lokasi sekarang
-                setCurrentEvent(null);
-                setShowEventPopup(false);
+            } else if (currentEvent) {
+                console.log("%c[handleActivity - No GIF] Event conditions NOT met or event already triggered. Details:", 'color: orange;');
+                console.log("  - currentEvent ID:", currentEvent.id);
+                console.log("  - currentEvent.requiredActivity:", currentEvent.requiredActivity, "vs activityName:", activityName);
+                console.log("  - !triggeredEventsRef.current[currentEvent.id]:", !triggeredEventsRef.current[currentEvent.id]);
+                console.log("  - currentEvent.location:", currentEvent.location, "vs locationForEventCheck:", locationForEventCheck);
+
+                if (currentEvent.location !== locationForEventCheck) {
+                    console.log("%c[handleActivity - No GIF] Clearing current event because player's location doesn't match event's trigger location.", 'color: orange;');
+                    setCurrentEvent(null);
+                    setShowEventPopup(false);
+                }
             }
         }
     }, [player, currentEvent, applyEventRewards, triggerLocationEvent, isActivityAnimating]);
 
 
     const handleFastForward = useCallback(() => {
+        console.log("%c[handleFastForward] Initiated Fast Forward.", 'color: #8A2BE2;');
         if (isActivityAnimating) {
             if (activityTimeoutRef.current) {
                 clearTimeout(activityTimeoutRef.current);
+                console.log("%c[handleFastForward] Cleared activity timeout.", 'color: #8A2BE2;');
             }
             setIsActivityAnimating(false);
             setCurrentActivityGif(null);
+            console.log("%c[handleFastForward] Animation stopped, GIF cleared.", 'color: #8A2BE2;');
+
 
             if (pendingActivity.current) {
-                const { activityName: completedActivityName, effectToApply: completedEffect, alertMessage: finalAlertMessage, isLocationChange: isCompletedLocationChange } = pendingActivity.current;
+                const { activityName: completedActivityName, effectToApply: completedEffect, alertMessage: finalAlertMessage, isLocationChange: isCompletedLocationChange, initialPlayerLocation } = pendingActivity.current;
+                console.log(`%c[handleFastForward] Processing pending activity: ${completedActivityName}`, 'color: #8A2BE2;');
+                console.log(`%c[handleFastForward] Current event state before processing pending activity:`, 'color: #8A2BE2;', currentEvent);
+
+                let finalPlayerStateAfterEffect = null;
 
                 if (completedEffect) {
                     setPlayer(prevPlayer => {
-                        const updatedPlayer = completedEffect(prevPlayer); // Panggil efek yang disimpan
-
-                        // Logika perubahan lokasi untuk fast-forward
+                        const updatedPlayer = completedEffect(prevPlayer);
+                        finalPlayerStateAfterEffect = updatedPlayer;
                         if (isCompletedLocationChange && updatedPlayer.location !== prevPlayer.location) {
                             setAvatarPosition({ x: 50, y: 50 });
-                            setCurrentEvent(null);
+                            setCurrentEvent(null); // Clear event on travel
                             setShowEventPopup(false);
                             triggerLocationEvent(updatedPlayer.location, updatedPlayer);
                         }
                         return updatedPlayer;
                     });
+                    console.log("%c[handleFastForward] Applied pending activity effects.", 'color: #8A2BE2;');
                 }
 
                 if (finalAlertMessage) {
                     alert(finalAlertMessage);
+                    console.log("%c[handleFastForward] Displayed final alert message.", 'color: #8A2BE2;');
                 }
 
-                // Pengecekan event hanya jika BUKAN perubahan lokasi
-                if (!isCompletedLocationChange && currentEvent &&
-                    currentEvent.triggerLocation === player.location && // <--- Gunakan triggerLocation di sini juga
+                const locationForEventCheck = finalPlayerStateAfterEffect ? finalPlayerStateAfterEffect.location : initialPlayerLocation;
+                console.log(`%c[handleFastForward] Location for event check: ${locationForEventCheck}. Initial: ${initialPlayerLocation}`, 'color: #8A2BE2;');
+
+
+                // Pengecekan event untuk fast-forward
+                if (currentEvent &&
                     currentEvent.requiredActivity === completedActivityName &&
-                    !triggeredEventsRef.current[currentEvent.id]
+                    !triggeredEventsRef.current[currentEvent.id] &&
+                    currentEvent.location === locationForEventCheck
                 ) {
+                    console.log("%c[handleFastForward] Event conditions met for Fast Forward. Calling applyEventRewards.", 'background: #00FF00; color: black;');
                     applyEventRewards();
-                } else if (currentEvent && currentEvent.triggerLocation !== player.location) { // Jika event tidak relevan dengan lokasi sekarang
-                    setCurrentEvent(null);
-                    setShowEventPopup(false);
-                }
+                } else if (currentEvent) {
+                    console.log("%c[handleFastForward] Event conditions NOT met for Fast Forward. Details:", 'color: orange;');
+                    console.log("  - currentEvent ID:", currentEvent.id);
+                    console.log("  - currentEvent.requiredActivity:", currentEvent.requiredActivity, "vs completedActivityName:", completedActivityName);
+                    console.log("  - !triggeredEventsRef.current[currentEvent.id]:", !triggeredEventsRef.current[currentEvent.id]);
+                    console.log("  - currentEvent.location:", currentEvent.location, "vs locationForEventCheck:", locationForEventCheck);
 
+                    if (currentEvent.location !== locationForEventCheck) {
+                        console.log("%c[handleFastForward] Clearing current event because player's location doesn't match event's trigger location.", 'color: orange;');
+                        setCurrentEvent(null);
+                        setShowEventPopup(false);
+                    }
+                }
 
                 if (completedActivityName === 'Go to MainMap') {
                     isReturningToMainMapRef.current = false;
+                    console.log("%c[handleFastForward] Resetting isReturningToMainMapRef.", 'color: #8A2BE2;');
                 }
 
                 pendingActivity.current = null;
+                console.log("%c[handleFastForward] Cleared pending activity.", 'color: #8A2BE2;');
             }
         }
-    }, [isActivityAnimating, currentEvent, applyEventRewards, triggerLocationEvent, player]); // `player` masih perlu di sini untuk `currentEvent.location === player.location` check
+    }, [isActivityAnimating, currentEvent, applyEventRewards, triggerLocationEvent, player]);
 
     // --- useEffect untuk Game Time ---
     useEffect(() => {
@@ -727,7 +961,8 @@ const App = () => {
                         newHour %= 24;
                     }
 
-                    if (hourChanged && (newHour % 6 === 0 || (prevTime.hour === 23 && newHour === 5))) {
+                    // Panggil decreasePlayerStatus setiap 6 jam game-time
+                    if (hourChanged && (newHour % 6 === 0 || (prevTime.hour === 23 && newHour === 5))) { // Misal jam 0, 6, 12, 18
                         decreasePlayerStatus();
                     }
 
@@ -754,13 +989,14 @@ const App = () => {
             setIsAvatarSelected(false);
             alert(`Game Over! ${player.name}'s journey ended due to low stats.`);
         }
-    }, [player]);
+    }, [player]); // Player sebagai dependency agar useEffect ini re-run saat player state berubah
 
     // --- useEffect untuk Keyboard Event Listener ---
     useEffect(() => {
-        let keysPressed = {};
+        let keysPressed = {}; // Untuk melacak tombol yang sedang ditekan
 
         const handleKeyDown = (event) => {
+            // Abaikan input keyboard jika game over, belum pilih avatar, popup event muncul, atau sedang animasi aktivitas
             if (!isAvatarSelected || gameOver || showEventPopup || isActivityAnimating) {
                 if (walkTimeout.current) clearTimeout(walkTimeout.current);
                 setIsWalking(false);
@@ -768,67 +1004,66 @@ const App = () => {
             }
 
             const key = event.key.toLowerCase();
-            keysPressed[key] = true;
+            keysPressed[key] = true; // Tandai tombol ini sedang ditekan
 
             let direction = null;
             switch (key) {
                 case 'arrowup': case 'w': direction = 'up'; break;
-                case 'down': case 's': direction = 'down'; break;
-                case 'left': case 'a': direction = 'left'; break;
-                case 'right': case 'd': direction = 'right'; break;
+                case 'arrowdown': case 's': direction = 'down'; break;
+                case 'arrowleft': case 'a': direction = 'left'; break;
+                case 'arrowright': case 'd': direction = 'right'; break;
                 default: break;
             }
 
             if (direction) {
-                event.preventDefault();
+                event.preventDefault(); // Mencegah scrolling browser
                 handleMove(direction);
 
                 if (!isWalking) {
-                    setIsWalking(true);
+                    setIsWalking(true); // Mulai animasi jalan
                 }
+                // Reset timeout untuk menghentikan animasi jalan jika tombol ditahan
                 if (walkTimeout.current) {
                     clearTimeout(walkTimeout.current);
                 }
                 walkTimeout.current = setTimeout(() => {
                     const anyMovementKey = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].some(k => keysPressed[k]);
-                    if (!anyMovementKey) {
-                        setIsWalking(false);
+                    if (!anyMovementKey) { // Jika tidak ada tombol gerakan lain yang ditekan
+                        setIsWalking(false); // Hentikan animasi jalan
                     }
-                }, 150);
+                }, 150); // Jeda singkat untuk menentukan apakah tombol masih ditekan
             }
         };
 
         const handleKeyUp = (event) => {
             const key = event.key.toLowerCase();
-            keysPressed[key] = false;
+            keysPressed[key] = false; // Tandai tombol ini sudah dilepas
 
             const anyMovementKey = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright']
                 .some(k => keysPressed[k]);
 
-            if (!anyMovementKey) {
+            if (!anyMovementKey) { // Jika tidak ada tombol gerakan yang sedang ditekan
                 if (walkTimeout.current) clearTimeout(walkTimeout.current);
-                setIsWalking(false);
+                setIsWalking(false); // Hentikan animasi jalan
             }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         window.addEventListener('keyup', handleKeyUp);
 
+        // Cleanup function
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
             window.removeEventListener('keyup', handleKeyUp);
             if (walkTimeout.current) clearTimeout(walkTimeout.current);
         };
-    }, [isAvatarSelected, gameOver, showEventPopup, handleMove, isWalking, isActivityAnimating]);
-
+    }, [isAvatarSelected, gameOver, showEventPopup, handleMove, isWalking, isActivityAnimating]); // Dependencies
 
     // --- Render ---
-    // ... di dalam App.jsx
-
     if (gameOver) {
         return (
             <GameOverScreen
-                player={player} // <-- TAMBAHKAN BARIS INI
+                player={player}
                 onRestartGame={() => {
                     setIsAvatarSelected(false);
                     setGameOver(false);
@@ -842,7 +1077,7 @@ const App = () => {
                         location: 'MainMap',
                         inventory: {
                             'Meat': { type: 'food', stock: 2 },
-                            'Meditation Guide': { type: 'tool', stock: 1 }
+                            // 'Meditation Guide': { type: 'tool', stock: 1 } // Pastikan ini juga dihapus saat restart game
                         },
                         avatar: null,
                     });
@@ -851,7 +1086,7 @@ const App = () => {
                     setIsWalking(false);
                     setShowEventPopup(false);
                     setCurrentEvent(null);
-                    triggeredEventsRef.current = {};
+                    triggeredEventsRef.current = {}; // Reset triggered events
                     setIsActivityAnimating(false);
                     setCurrentActivityGif(null);
                     if (activityTimeoutRef.current) clearTimeout(activityTimeoutRef.current);
@@ -884,15 +1119,19 @@ const App = () => {
                 currentActivityGif={currentActivityGif}
                 onFastForward={handleFastForward}
             />
-            {showEventPopup && currentEvent && currentEvent.triggerLocation === player.location && ( // <--- PERUBAHAN UTAMA DI SINI
+            {/* EventPopup hanya ditampilkan jika showEventPopup true, ada currentEvent, DAN player berada di lokasi pemicu event */}
+            {showEventPopup && currentEvent && currentEvent.location === player.location && (
                 <EventPopup
-                    event={currentEvent} // event object itu sendiri memiliki properti 'location' asli (misal 'Temple')
+                    event={currentEvent}
                     onClose={() => {
-                        if (currentEvent) {
-                            triggeredEventsRef.current = { ...triggeredEventsRef.current, [currentEvent.id]: true };
-                        }
+                        console.log(`%c[EventPopup.onClose] Closing popup for event ID: ${currentEvent?.id}`, 'color: orange;');
+                        // Tidak perlu menandai event sebagai triggered di sini.
+                        // Penandaan dilakukan di applyEventRewards SETELAH aktivitas selesai.
                         setShowEventPopup(false);
-                        setCurrentEvent(null);
+                        // Kritis: currentEvent TIDAK di-null-kan di sini.
+                        // currentEvent tetap ada di state agar handleActivity bisa merujuknya
+                        // untuk penerapan reward nanti. Ia akan di-null-kan di applyEventRewards.
+                        console.log(`%c[EventPopup.onClose] currentEvent state after closing popup:`, 'color: orange;', currentEvent);
                     }}
                 />
             )}
