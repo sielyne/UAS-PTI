@@ -1,7 +1,7 @@
 import React from 'react';
 import '../styles/GameOverScreen.css'; // Import CSS file
 
-const GameOverScreen = ({ player, onRestart }) => {
+const GameOverScreen = ({ player, onRestartGame }) => {
   return (
     <div className="game-over-container">
       <h1 className="game-over-title">Game Over!</h1>
@@ -12,7 +12,7 @@ const GameOverScreen = ({ player, onRestart }) => {
         Final Money: Rp{player.money.toLocaleString()}
       </p>
       <button
-        onClick={onRestart}
+        onClick={onRestartGame}
         className="play-again-button"
       >
         Play Again

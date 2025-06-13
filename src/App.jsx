@@ -5,26 +5,11 @@ import GameOverScreen from './components/GameOverScreen';
 import EventPopup from './components/activities/EventPopup';
 import './index.css';
 
-// Constants for consumable item effects
-const CONSUMABLE_ITEM_EFFECTS = {
-  'Meat': { hunger: 30, energy: 5, happiness: 0, hygiene: 0 },
-  'Freshwater Fish': { hunger: 20, energy: 10, happiness: 5, hygiene: 0 },
-  'Comfort Food': { hunger: 25, energy: 15, happiness: 10, hygiene: 0 },
-  'Fish': { hunger: 20, energy: 10, happiness: 5, hygiene: 0 },
-  'Mountain Herb': { hunger: 5, energy: 15, happiness: 5, hygiene: 0 },
-};
-
-// Constants for non-consumable item effects (e.g., tool)
-const NON_CONSUMABLE_ITEM_EFFECTS = {
-  'Meditation Guide': { activityBonus: { 'Pray': { happiness: 10, energy: 5 } } },
-};
-
-// Map activity names to their corresponding GIF files
-// Pastikan nama file GIF sesuai dengan nama aktivitas dan ada di folder yang benar
+// --- Definisi Konstanta ---
 const ACTIVITY_GIFS = {
     'Work': '/assets/gifs/kerja.gif',
-    'Eat': '/assets/gifs/makan.gif', // Ini bisa jadi GIF umum untuk makan
-    'Use Consumable Item': '/assets/gifs/makan.gif', // Bisa pakai GIF yang sama
+    'Eat': '/assets/gifs/makan.gif',
+    'Use Consumable Item': '/assets/gifs/makan.gif',
     'Swim': '/assets/gifs/renang.gif',
     'Fishing': '/assets/gifs/mancing.gif',
     'Hike': '/assets/gifs/hiking.gif',
@@ -32,910 +17,887 @@ const ACTIVITY_GIFS = {
     'Take a Bath': '/assets/gifs/mandi.gif',
     'Buy Souvenir': '/assets/gifs/souvenir.gif',
     'Explore': '/assets/gifs/explore.gif',
-    'Explore Area': '/assets/gifs/explore.gif', // Jika 'Explore Area' adalah alias
+    'Explore Area': '/assets/gifs/explore.gif',
     'Pray': '/assets/gifs/doa.gif',
-    // Tambahkan GIF untuk aktivitas lain jika ada
-    // Misalnya, untuk travel:
     'Go to Home': '/assets/gifs/travel.gif',
     'Go to Mountain': '/assets/gifs/travel.gif',
     'Go to Lake': '/assets/gifs/travel.gif',
     'Go to Beach': '/assets/gifs/travel.gif',
     'Go to Temple': '/assets/gifs/travel.gif',
-    'Go to MainMap': '/assets/gifs/travel.gif',
+    'Go to MainMap': '/assets/gifs/travel.gif', // Pastikan GIF ini ada
 };
 
+const CONSUMABLE_ITEM_EFFECTS = {
+    'Meat': { hunger: 30, energy: 5, happiness: 0, hygiene: 0 },
+    'Freshwater Fish': { hunger: 20, energy: 10, happiness: 5, hygiene: 0 },
+    'Comfort Food': { hunger: 25, energy: 15, happiness: 10, hygiene: 0 },
+    'Fish': { hunger: 20, energy: 10, happiness: 5, hygiene: 0 },
+    'Mountain Herb': { hunger: 5, energy: 15, happiness: 5, hygiene: 0 },
+};
 
-const App = () => {
-  const [isWalking, setIsWalking] = useState(false);
-  const [player, setPlayer] = useState({
-    name: "",
-    avatar: "",
-    money: 750000,
-    happiness: 50,
-    hunger: 50,
-    hygiene: 50,
-    energy: 50,
-    location: "MainMap",
-    inventory: {
-      'Meat': { type: 'food', stock: 2 },
-      'Meditation Guide': { type: 'tool', stock: 1 }
-    }
-  });
+const NON_CONSUMABLE_ITEM_EFFECTS = {
+    'Meditation Guide': { activityBonus: { 'Pray': { happiness: 10, energy: 5 } } },
+};
 
-  const [avatarPosition, setAvatarPosition] = useState({ x: 50, y: 50 });
-  const [gameTime, setGameTime] = useState({ hour: 8, minute: 0, day: 1 });
-  const [gameStarted, setGameStarted] = useState(false);
-  const timeIntervalRef = useRef(null);
-  const [gameOver, setGameOver] = useState(false);
-  const [showEventPopup, setShowEventPopup] = useState(false);
-  const [currentEvent, setCurrentEvent] = useState(null);
-  const triggeredEventsRef = useRef({});
-  
-  const walkTimeout = useRef(null);
-
-  // --- NEW STATES FOR ACTIVITY ANIMATION ---
-  const [isActivityAnimating, setIsActivityAnimating] = useState(false);
-  const [currentActivityGif, setCurrentActivityGif] = useState(null);
-  const activityTimeoutRef = useRef(null); // Ref untuk menyimpan timeout animasi
-  const pendingActivity = useRef(null); // Ref untuk menyimpan aktivitas yang tertunda
-  // --- END NEW STATES ---
-
-  const mapAreas = {
+const MAP_AREAS = {
     MainMap: {
-      Home: { x: [10, 20], y: [10, 25] },
-      Mountain: { x: [40, 60], y: [15, 25] },
-      Lake: { x: [70, 90], y: [25, 35] },
-      Beach: { x: [70, 90], y: [70, 90] },
-      Temple: { x: [40, 60], y: [60, 75] }
+        Home: { x: [10, 20], y: [10, 25] },
+        Mountain: { x: [40, 60], y: [15, 25] },
+        Lake: { x: [70, 90], y: [25, 35] },
+        Beach: { x: [70, 90], y: [70, 90] },
+        Temple: { x: [40, 60], y: [60, 75] }
     }
-  };
+};
 
-  const locationEvents = {
-    'Home': [
-      {
-        id: 'home_relax',
-        message: "You found an opportunity to relax and recharge at home.",
-        rewards: {
-          happiness: 15,
-          energy: 10,
-          inventory: {
-            'Comfort Food': { type: 'food', stock: 1 },
-            'Passport': { type: 'collectible', stock: 1 }
-          }
+const LOCATION_EVENTS = {
+    'MainMap': [
+        {
+            id: 'mainmap_merchant',
+            message: 'A traveling merchant arrived! You can buy rare goods if you visit the Temple.',
+            requiredActivity: 'Buy Souvenir',
+            location: 'Temple', // Ini adalah lokasi referensi untuk aktivitas, BUKAN lokasi pemicu event
+            rewards: { money: 500000, inventory: { 'Rare Stone': { type: 'collectible', stock: 1 } } },
         },
-        requiredActivity: 'Sleep'
-      },
+        {
+            id: 'mainmap_community_help',
+            message: 'The local community needs help gathering fruits. If you help them at Home, they might reward you!',
+            requiredActivity: 'Work',
+            location: 'Home', // Ini adalah lokasi referensi untuk aktivitas, BUKAN lokasi pemicu event
+            rewards: { happiness: 10, inventory: { 'Tropical Fruit': { type: 'food', stock: 2 } } },
+        },
+    ],
+    'Home': [
+        {
+            id: 'home_relax',
+            message: "You found an opportunity to relax and recharge at home.",
+            rewards: {
+                happiness: 15,
+                energy: 10,
+                inventory: {
+                    'Comfort Food': { type: 'food', stock: 1 },
+                    'Passport': { type: 'collectible', stock: 1 }
+                }
+            },
+            requiredActivity: 'Sleep',
+            location: 'Home' // Ini adalah lokasi pemicu event
+        },
     ],
     'Temple': [
-      {
-        id: 'temple_reflection',
-        message: "You feel peace in the temple. There is an opportunity for reflection.",
-        rewards: {
-          happiness: 25,
-          energy: 15,
-          inventory: { 'Meditation Guide': { type: 'tool', stock: 1 } }
-        },
-        requiredActivity: 'Pray'
-      }
+        {
+            id: 'temple_reflection',
+            message: "You feel peace in the temple. There is an opportunity for reflection.",
+            rewards: {
+                happiness: 25,
+                energy: 15,
+                inventory: { 'Meditation Guide': { type: 'tool', stock: 1 } }
+            },
+            requiredActivity: 'Pray',
+            location: 'Temple' // Ini adalah lokasi pemicu event
+        }
     ],
     'Beach': [
-      {
-        id: 'beach_waves',
-        message: "The waves are calling! There's something special at the beach.",
-        rewards: {
-          happiness: 20,
-          money: 300000,
-          inventory: { 'Rare Seashell': { type: 'collectible', stock: 1 } }
-        },
-        requiredActivity: 'Swim'
-      }
+        {
+            id: 'beach_waves',
+            message: "The waves are calling! There's something special at the beach.",
+            rewards: {
+                happiness: 20,
+                money: 300000,
+                inventory: { 'Rare Seashell': { type: 'collectible', stock: 1 } }
+            },
+            requiredActivity: 'Swim',
+            location: 'Beach' // Ini adalah lokasi pemicu event
+        }
     ],
     'Lake': [
-      {
-        id: 'lake_patience',
-        message: "The lake looks calm, perfect for practicing your patience.",
-        rewards: {
-          happiness: 18,
-          hunger: 15,
-          inventory: { 'Freshwater Fish': { type: 'food', stock: 1 } }
-        },
-        requiredActivity: 'Fishing'
-      }
+        {
+            id: 'lake_patience',
+            message: "The lake looks calm, perfect for practicing your patience.",
+            rewards: {
+                happiness: 18,
+                hunger: 15,
+                inventory: { 'Freshwater Fish': { type: 'food', stock: 1 } }
+            },
+            requiredActivity: 'Fishing',
+            location: 'Lake' // Ini adalah lokasi pemicu event
+        }
     ],
     'Mountain': [
-      {
-        id: 'mountain_adventure',
-        message: "The mountain view promises adventure. A discovery awaits.",
-        rewards: {
-          happiness: 30,
-          energy: -10,
-          hygiene: -5,
-          inventory: { 'Mountain Herb': { type: 'plant', stock: 1 } }
-        },
-        requiredActivity: 'Hike'
-      }
+        {
+            id: 'mountain_adventure',
+            message: "The mountain view promises adventure. A discovery awaits.",
+            rewards: {
+                happiness: 30,
+                energy: -10,
+                hygiene: -5,
+                inventory: { 'Mountain Herb': { type: 'plant', stock: 1 } }
+            },
+            requiredActivity: 'Hike',
+            location: 'Mountain' // Ini adalah lokasi pemicu event
+        }
     ]
-  };
+};
 
-  const selectAvatar = (avatarSrc) => {
-    setPlayer(prevPlayer => ({ ...prevPlayer, avatar: avatarSrc }));
-  };
-
-  const decreasePlayerStatus = useCallback(() => {
-    setPlayer(prevPlayer => ({
-      ...prevPlayer,
-      hunger: Math.max(0, prevPlayer.hunger - 1),
-      hygiene: Math.max(0, prevPlayer.hygiene - 1),
-      energy: Math.max(0, prevPlayer.energy - 1),
-      happiness: Math.max(0, prevPlayer.happiness - 1),
-    }));
-  }, []);
-
-  const applyPassiveItemEffects = useCallback(() => {
-    setPlayer(prevPlayer => {
-      let newHappiness = prevPlayer.happiness;
-      const collectibles = Object.keys(prevPlayer.inventory).filter(
-        itemName => prevPlayer.inventory[itemName].type === 'collectible'
-      );
-      if (collectibles.length > 0) {
-        newHappiness = Math.min(100, newHappiness + (collectibles.length * 1));
-      }
-      return { ...prevPlayer, happiness: newHappiness };
+const App = () => {
+    // --- States ---
+    const [isAvatarSelected, setIsAvatarSelected] = useState(false);
+    const [gameOver, setGameOver] = useState(false);
+    const [player, setPlayer] = useState({
+        name: '',
+        money: 750000,
+        happiness: 50,
+        hunger: 50,
+        hygiene: 50,
+        energy: 50,
+        location: 'MainMap',
+        inventory: {
+            'Meat': { type: 'food', stock: 2 },
+            'Meditation Guide': { type: 'tool', stock: 1 }
+        },
+        avatar: null,
     });
-  }, []);
-
-  const startGameTime = useCallback(() => {
-    const REAL_WORLD_INTERVAL_MS = 20 * 1000;
-    const GAME_TIME_INCREMENT_MINUTES = 10;
-
-    if (timeIntervalRef.current) clearInterval(timeIntervalRef.current);
-
-    timeIntervalRef.current = setInterval(() => {
-      setGameTime(prevTime => {
-        let newMinute = prevTime.minute + GAME_TIME_INCREMENT_MINUTES;
-        let newHour = prevTime.hour;
-        let newDay = prevTime.day;
-
-        let hourChanged = false;
-        if (newMinute >= 60) {
-          newHour += Math.floor(newMinute / 60);
-          newMinute %= 60;
-          hourChanged = true;
-        }
-
-        if (newHour >= 24) {
-          newDay += Math.floor(newHour / 24);
-          newHour %= 24;
-        }
-
-        if (hourChanged && (newHour % 6 === 0 || (prevTime.hour === 23 && newHour === 5))) {
-          decreasePlayerStatus();
-          applyPassiveItemEffects();
-        }
-
-        return { hour: newHour, minute: newMinute, day: newDay };
-      });
-    }, REAL_WORLD_INTERVAL_MS);
-  }, [decreasePlayerStatus, applyPassiveItemEffects]);
-
-  useEffect(() => {
-    if (
-      player.hunger <= 0 ||
-      player.hygiene <= 0 ||
-      player.energy <= 0 ||
-      player.happiness <= 0
-    ) {
-      if (timeIntervalRef.current) clearInterval(timeIntervalRef.current);
-      setGameOver(true);
-      setGameStarted(false);
-      alert(`Game Over! ${player.name}'s journey ended due to low stats.`);
-    }
-  }, [player]);
-
-  const startGame = (playerName) => {
-    if (!playerName.trim()) {
-      alert('Please enter your name!');
-      return;
-    }
-    if (!player.avatar) {
-      alert('Please select an avatar!');
-      return;
+    const resetGame = () => {
+        if (newEnergy <= 0) {
+            alert("Game Over!");
+            resetGame();
+            return;
     }
 
-    setPlayer(prevPlayer => ({ ...prevPlayer, name: playerName }));
-    setGameStarted(true);
-    startGameTime();
-    triggerLocationEvent('MainMap');
-  };
-
-  const restartGame = () => {
-    if (timeIntervalRef.current) clearInterval(timeIntervalRef.current);
-    timeIntervalRef.current = null;
-    setPlayer({
-      name: "",
-      avatar: "",
-      money: 750000,
-      happiness: 50,
-      hunger: 50,
-      hygiene: 50,
-      energy: 50,
-      location: "MainMap",
-      inventory: {
-        'Meat': { type: 'food', stock: 2 },
-        'Meditation Guide': { type: 'tool', stock: 1 }
-      }
-    });
-    setAvatarPosition({ x: 50, y: 50 });
-    setGameTime({ hour: 8, minute: 0, day: 1 });
-    setGameStarted(false);
-    setGameOver(false);
-    setShowEventPopup(false);
-    setCurrentEvent(null);
-    triggeredEventsRef.current = {};
-    // Reset activity animation states
-    setIsActivityAnimating(false);
-    setCurrentActivityGif(null);
-    if (activityTimeoutRef.current) clearTimeout(activityTimeoutRef.current);
-    pendingActivity.current = null;
-  };
-
-
-  const triggerLocationEvent = useCallback((location) => {
-    const potentialEvents = locationEvents[location];
-    if (potentialEvents && potentialEvents.length > 0) {
-      const availableEvents = potentialEvents.filter(event =>
-        !triggeredEventsRef.current[event.id] && (!event.condition || event.condition(player))
-      );
-
-      if (availableEvents.length > 0) {
-        const randomEvent = availableEvents[Math.floor(Math.random() * availableEvents.length)];
-        setCurrentEvent(randomEvent);
-        setShowEventPopup(true);
-        // Do NOT mark as triggered here. Mark it when event is successfully completed via activity.
-      } else {
+        setAvatarPosition({ x: 5, y: 5 });
+        setGameTime({ hour: 6, minute: 0 });
+        setIsWalking(false);
+        setIsActivityAnimating(false);
+        setCurrentActivityGif(null);
         setCurrentEvent(null);
-        setShowEventPopup(false);
-      }
-    } else {
-      setCurrentEvent(null);
-      setShowEventPopup(false);
-    }
-  }, [player]);
-
-
-  const checkAreaTransition = useCallback((newX, newY) => {
-    if (player.location === 'MainMap' && mapAreas.MainMap) {
-      const travelCost = 5;
-      const moneyCost = 500000;
-
-      for (const [area, bounds] of Object.entries(mapAreas.MainMap)) {
-        if (newX >= bounds.x[0] && newX <= bounds.x[1] &&
-            newY >= bounds.y[0] && newY <= bounds.y[1]) {
-
-          if (player.money < moneyCost) {
-            alert("Insufficient money to move to this location (Rp 500,000 required).");
-            return false;
-          }
-          if (player.energy < travelCost) {
-            alert(`You don't have enough energy (${travelCost}) to enter ${area}!`);
-            return false;
-          }
-
-          setPlayer(prevPlayer => ({
-            ...prevPlayer,
-            location: area,
-            energy: Math.max(0, prevPlayer.energy - travelCost),
-            money: Math.max(0, prevPlayer.money - moneyCost),
-            happiness: Math.min(100, prevPlayer.happiness + 5),
-          }));
-          setAvatarPosition({ x: 50, y: 50 });
-
-          // No direct event trigger here, handle in onActivity if "Go to" is clicked
-          return true;
-        }
-      }
-    }
-    return false;
-  }, [player.location, player.money, player.energy, mapAreas.MainMap]);
-
-
-  const handleMove = useCallback((direction) => {
-    if (isActivityAnimating) return; // Prevent movement during activity animation
-
-    const energyCostPerStep = 1;
-    if (player.energy < energyCostPerStep) {
-      alert("You don't have enough energy to move!");
-      setIsWalking(false);
-      return;
-    }
-
-    const moveDistance = 2;
-    let newX = avatarPosition.x;
-    let newY = avatarPosition.y;
-
-    switch (direction) {
-      case 'up': newY = Math.max(5, avatarPosition.y - moveDistance); break;
-      case 'down': newY = Math.min(95, avatarPosition.y + moveDistance); break;
-      case 'left': newX = Math.max(5, avatarPosition.x - moveDistance); break;
-      case 'right': newX = Math.min(95, avatarPosition.x + moveDistance); break;
-      default: break;
-    }
-
-    setIsWalking(true);
-    // Timeout untuk menghentikan animasi setelah jeda singkat
-    // Ini akan direset di useEffect keyboard handling jika tombol ditekan terus
-    if (activityTimeoutRef.current) clearTimeout(activityTimeoutRef.current);
-    activityTimeoutRef.current = setTimeout(() => setIsWalking(false), 300);
-
-    if (!checkAreaTransition(newX, newY)) {
-      setAvatarPosition({ x: newX, y: newY });
-      setPlayer(prevPlayer => ({
-        ...prevPlayer,
-        energy: Math.max(0, prevPlayer.energy - energyCostPerStep)
-      }));
-    }
-  }, [player.energy, avatarPosition, checkAreaTransition, isActivityAnimating]);
-
-
-  const handleBackToMainMap = useCallback(() => {
-    if (isActivityAnimating) return; // Prevent action during activity animation
-
-    const travelEnergyCost = 15;
-    const travelMoneyCost = 50000;
-
-    if (player.money < travelMoneyCost) {
-        alert(`Insufficient money to go back to Main Map (Rp ${travelMoneyCost.toLocaleString()} required).`);
-        return;
-    }
-    if (player.energy < travelEnergyCost) {
-        alert(`You don't have enough energy (${travelEnergyCost}) to go back to Main Map!`);
-        return;
-    }
-
-    const performBackToMainMap = () => {
-        setPlayer(prevPlayer => ({
-            ...prevPlayer,
-            location: 'MainMap',
-            energy: Math.max(0, prevPlayer.energy - travelEnergyCost),
-            money: Math.max(0, prevPlayer.money - travelMoneyCost),
-            happiness: Math.min(100, prevPlayer.happiness + 5),
-        }));
-        setAvatarPosition({ x: 50, y: 50 });
-        triggerLocationEvent('MainMap');
-        alert(`You returned to Main Map. -${travelEnergyCost} Energy, -Rp${travelMoneyCost.toLocaleString()} Money, +5 Happiness.`);
     };
 
-    // Trigger animation for travel
-    setCurrentActivityGif(ACTIVITY_GIFS['Go to MainMap']); // Use travel GIF
-    setIsActivityAnimating(true);
-    activityTimeoutRef.current = setTimeout(() => {
-      setIsActivityAnimating(false);
-      setCurrentActivityGif(null);
-      performBackToMainMap(); // Apply rewards after animation
-    }, 7000); // 7 seconds animation
-  }, [player, setPlayer, triggerLocationEvent, isActivityAnimating]);
+    const [gameTime, setGameTime] = useState({ hour: 8, minute: 0, day: 1 });
+    const [avatarPosition, setAvatarPosition] = useState({ x: 50, y: 50 });
+    const [isWalking, setIsWalking] = useState(false);
+    const [showEventPopup, setShowEventPopup] = useState(false);
+    const [currentEvent, setCurrentEvent] = useState(null); // currentEvent sekarang akan punya properti triggerLocation
 
+    // --- STATE UNTUK ANIMASI AKTIVITAS ---
+    const [isActivityAnimating, setIsActivityAnimating] = useState(false);
+    const [currentActivityGif, setCurrentActivityGif] = useState(null);
 
-  const applyEventRewards = useCallback(() => {
-    if (currentEvent && currentEvent.rewards) {
-      setPlayer(prevPlayer => {
-        let newPlayer = { ...prevPlayer };
-        const rewards = currentEvent.rewards;
+    // --- REFS ---
+    const timeIntervalRef = useRef(null);
+    const activityTimeoutRef = useRef(null);
+    const pendingActivity = useRef(null);
+    const walkTimeout = useRef(null);
+    const triggeredEventsRef = useRef({});
+    const isReturningToMainMapRef = useRef(false);
 
-        if (rewards.happiness !== undefined) { newPlayer.happiness = Math.min(100, Math.max(0, prevPlayer.happiness + rewards.happiness)); }
-        if (rewards.energy !== undefined) { newPlayer.energy = Math.min(100, Math.max(0, prevPlayer.energy + rewards.energy)); }
-        if (rewards.hunger !== undefined) { newPlayer.hunger = Math.min(100, Math.max(0, prevPlayer.hunger + rewards.hunger)); }
-        if (rewards.hygiene !== undefined) { newPlayer.hygiene = Math.min(100, Math.max(0, prevPlayer.hygiene + rewards.hygiene)); }
-        if (rewards.money !== undefined) { newPlayer.money = prevPlayer.money + rewards.money; }
+    // --- Callbacks (dioptimalkan dengan useCallback) ---
+    const handleSetAvatar = useCallback((avatarPath) => {
+        setPlayer(prevPlayer => ({
+            ...prevPlayer,
+            avatar: avatarPath,
+        }));
+    }, []);
 
-        if (rewards.inventory) {
-          newPlayer.inventory = { ...prevPlayer.inventory };
-          Object.entries(rewards.inventory).forEach(([item, data]) => {
-            newPlayer.inventory[item] = {
-              ...newPlayer.inventory[item],
-              type: data.type || 'unknown',
-              stock: (newPlayer.inventory[item]?.stock || 0) + data.stock
-            };
-          });
-        }
-        return newPlayer;
-      });
-      // Mark event as triggered ONLY when rewards are successfully applied
-      triggeredEventsRef.current = { ...triggeredEventsRef.current, [currentEvent.id]: true };
-    }
-  }, [currentEvent, setPlayer]);
+    const handleGameStart = useCallback((playerNameInput) => {
+        setPlayer(prevPlayer => ({
+            ...prevPlayer,
+            name: playerNameInput.trim() || 'Player',
+        }));
+        setIsAvatarSelected(true);
+    }, []);
 
+    const decreasePlayerStatus = useCallback(() => {
+        setPlayer(prevPlayer => {
+            let newPlayer = { ...prevPlayer };
+            newPlayer.hunger = Math.max(0, newPlayer.hunger - 1);
+            newPlayer.hygiene = Math.max(0, newPlayer.hygiene - 1);
+            newPlayer.energy = Math.max(0, newPlayer.energy - 1);
+            newPlayer.happiness = Math.max(0, newPlayer.happiness - 1);
 
-  const handleActivity = useCallback((activity) => {
-    if (isActivityAnimating) return; // Prevent new activity during animation
-
-    let activityPerformedSuccessfully = false;
-    let alertMessage = "";
-    let willAnimate = true; // Default to true for most activities
-
-    const performActivityLogic = () => { // Function to encapsulate activity logic
-      if (activity.startsWith('Go to ')) {
-        const targetLocation = activity.replace('Go to ', '');
-        if (player.location === 'MainMap' && mapAreas.MainMap[targetLocation]) {
-          const travelEnergyCost = 15;
-          const travelMoneyCost = 500000;
-
-          if (player.money < travelMoneyCost) {
-            alertMessage = `Insufficient money to travel to ${targetLocation} (Rp ${travelMoneyCost.toLocaleString()} required).`;
-            willAnimate = false; // No animation if failed
-          } else if (player.energy < travelEnergyCost) {
-            alertMessage = `You don't have enough energy (${travelEnergyCost}) to travel to ${targetLocation}!`;
-            willAnimate = false; // No animation if failed
-          } else {
-            setPlayer(prevPlayer => ({
-              ...prevPlayer,
-              location: targetLocation,
-              energy: Math.max(0, prevPlayer.energy - travelEnergyCost),
-              money: Math.max(0, prevPlayer.money - travelMoneyCost),
-              happiness: Math.min(100, prevPlayer.happiness + 5),
-            }));
-            setAvatarPosition({ x: 50, y: 50 });
-            alertMessage = `You traveled to ${targetLocation}. -${travelEnergyCost} Energy, -Rp${travelMoneyCost.toLocaleString()} Money, +5 Happiness.`;
-            activityPerformedSuccessfully = true;
-            triggerLocationEvent(targetLocation); // Trigger event for new location
-          }
-        } else if (player.location !== 'MainMap' && targetLocation === 'MainMap') {
-          // This case is now handled by handleBackToMainMap which includes animation
-          handleBackToMainMap();
-          activityPerformedSuccessfully = true;
-          willAnimate = false; // handleBackToMainMap already handles its own animation
-        } else {
-          alertMessage = `Invalid travel to ${targetLocation} from ${player.location}.`;
-          willAnimate = false;
-        }
-        if (alertMessage && !willAnimate) { alert(alertMessage); } // Alert immediately for failed travel
-        return; // Exit if it's a travel activity
-      }
-
-      switch (activity) {
-        case 'Work':
-          if (player.location === 'Home' || player.location === 'MainMap') {
-            if (player.energy >= 20) {
-              setPlayer(prevPlayer => ({
-                ...prevPlayer,
-                money: prevPlayer.money + 500000,
-                energy: Math.max(0, prevPlayer.energy - 20),
-                happiness: Math.max(0, prevPlayer.happiness - 5),
-                hunger: Math.max(0, prevPlayer.hunger - 10),
-              }));
-              alertMessage = "You worked hard! +IDR 500,000, -20 Energy, -5 Happiness, -10 Hunger.";
-              activityPerformedSuccessfully = true;
-            } else {
-              alertMessage = "You don't have enough energy (20) to work!"; willAnimate = false;
+            const collectibles = Object.keys(prevPlayer.inventory).filter(
+                itemName => prevPlayer.inventory[itemName]?.type === 'collectible'
+            );
+            if (collectibles.length > 0) {
+                newPlayer.happiness = Math.min(100, newPlayer.happiness + (collectibles.length * 1));
             }
-          } else {
-            alertMessage = `You cannot work in ${player.location}! Try at home or Main Map.`; willAnimate = false;
-          }
-          break;
 
-        case 'Eat':
-        case 'Use Consumable Item':
-            const availableConsumableItems = Object.keys(player.inventory).filter(itemName =>
-              (player.inventory[itemName].type === 'food' || player.inventory[itemName].type === 'plant') &&
-              player.inventory[itemName].stock > 0 && CONSUMABLE_ITEM_EFFECTS[itemName]
+            return newPlayer;
+        });
+    }, []);
+
+    const triggerLocationEvent = useCallback((location, currentPlayerState) => {
+        // Logika untuk mereset event yang sedang aktif saat pindah lokasi
+        // Gunakan currentEvent.triggerLocation untuk memastikan kita mereset event dari lokasi pemicu yang berbeda
+        const currentEventTriggerLocation = currentEvent ? currentEvent.triggerLocation : null;
+        if (currentEvent && currentEventTriggerLocation !== location) {
+            setShowEventPopup(false);
+            setCurrentEvent(null);
+        }
+
+        const potentialEvents = LOCATION_EVENTS[location]; // Mendapatkan event berdasarkan KUNCI lokasi saat ini
+        if (potentialEvents && potentialEvents.length > 0) {
+            const availableEvents = potentialEvents.filter(event =>
+                !triggeredEventsRef.current[event.id] && (!event.condition || event.condition(currentPlayerState))
             );
 
-            let itemToUse = null;
-            if (activity === 'Use Consumable Item' && availableConsumableItems.length > 0) {
-              itemToUse = prompt(`Select an item to use (available: ${availableConsumableItems.join(', ')}):`);
-              if (!itemToUse || !availableConsumableItems.includes(itemToUse)) {
-                alertMessage = "Invalid choice or item not available."; willAnimate = false; break;
-              }
-            } else if (activity === 'Eat' && player.location === 'Home') {
-              if (availableConsumableItems.length > 0) {
-                itemToUse = availableConsumableItems[0];
-              } else {
-                alertMessage = "You don't have any food to eat at home! Try buying some or fishing."; willAnimate = false; break;
-              }
-            } else if (activity === 'Eat' && player.location !== 'Home') {
-              const restaurantCost = 100000;
-              if (player.money >= restaurantCost) {
-                setPlayer(prevPlayer => ({
-                  ...prevPlayer,
-                  money: prevPlayer.money - restaurantCost,
-                  hunger: Math.min(100, prevPlayer.hunger + 40),
-                  happiness: Math.min(100, prevPlayer.happiness + 10),
-                  energy: Math.min(100, prevPlayer.energy + 10),
-                }));
-                alertMessage = `You ate at a restaurant in ${player.location}. -IDR 100,000, +40 Hunger, +10 Happiness, +10 Energy.`;
-                activityPerformedSuccessfully = true;
-                break;
-              } else {
-                alertMessage = "You don't have enough money to eat at a restaurant!"; willAnimate = false; break;
-              }
+            if (availableEvents.length > 0) {
+                const randomEvent = availableEvents[Math.floor(Math.random() * availableEvents.length)];
+                // Simpan event yang terpilih, dan tambahkan properti triggerLocation
+                // Ini memastikan kita tahu di lokasi mana event ini *sebenarnya* dipicu
+                setCurrentEvent({ ...randomEvent, triggerLocation: location }); // <--- PERUBAHAN UTAMA DI SINI
+                setShowEventPopup(true);
             } else {
-              alertMessage = "No consumable items available or invalid choice for 'Eat'."; willAnimate = false; break;
+                setCurrentEvent(null);
+                setShowEventPopup(false);
             }
+        } else {
+            setCurrentEvent(null);
+            setShowEventPopup(false);
+        }
+    }, [currentEvent]); // currentEvent masih dependency untuk pengecekan awal
 
-            if (itemToUse) {
-              const effects = CONSUMABLE_ITEM_EFFECTS[itemToUse];
-              setPlayer(prevPlayer => {
+    const applyEventRewards = useCallback(() => {
+        if (currentEvent && currentEvent.rewards) {
+            setPlayer(prevPlayer => {
                 let newPlayer = { ...prevPlayer };
-                newPlayer.inventory = {
-                  ...newPlayer.inventory,
-                  [itemToUse]: {
-                    ...newPlayer.inventory[itemToUse],
-                    stock: newPlayer.inventory[itemToUse].stock - 1
-                  }
-                };
-                if (newPlayer.inventory[itemToUse].stock <= 0) {
-                  const { [itemToUse]: _, ...restInventory } = newPlayer.inventory;
-                  newPlayer.inventory = restInventory;
+                const rewards = currentEvent.rewards;
+
+                if (rewards.happiness !== undefined) { newPlayer.happiness = Math.min(100, Math.max(0, prevPlayer.happiness + rewards.happiness)); }
+                if (rewards.energy !== undefined) { newPlayer.energy = Math.min(100, Math.max(0, prevPlayer.energy + rewards.energy)); }
+                if (rewards.hunger !== undefined) { newPlayer.hunger = Math.min(100, Math.max(0, prevPlayer.hunger + rewards.hunger)); }
+                if (rewards.hygiene !== undefined) { newPlayer.hygiene = Math.min(100, Math.max(0, prevPlayer.hygiene + rewards.hygiene)); }
+                if (rewards.money !== undefined) { newPlayer.money = prevPlayer.money + rewards.money; }
+
+                if (rewards.inventory) {
+                    newPlayer.inventory = { ...prevPlayer.inventory };
+                    Object.entries(rewards.inventory).forEach(([item, data]) => {
+                        newPlayer.inventory[item] = {
+                            ...newPlayer.inventory[item],
+                            type: data.type || 'unknown',
+                            stock: (newPlayer.inventory[item]?.stock || 0) + data.stock
+                        };
+                    });
                 }
-                let msg = `You used ${itemToUse}. `;
-                if (effects.hunger !== undefined) {
-                  newPlayer.hunger = Math.min(100, Math.max(0, prevPlayer.hunger + effects.hunger));
-                  msg += `${effects.hunger > 0 ? '+' : ''}${effects.hunger} Hunger, `;
-                }
-                if (effects.energy !== undefined) {
-                  newPlayer.energy = Math.min(100, Math.max(0, prevPlayer.energy + effects.energy));
-                  msg += `${effects.energy > 0 ? '+' : ''}${effects.energy} Energy, `;
-                }
-                if (effects.happiness !== undefined) {
-                  newPlayer.happiness = Math.min(100, Math.max(0, prevPlayer.happiness + effects.happiness));
-                  msg += `${effects.happiness > 0 ? '+' : ''}${effects.happiness} Happiness, `;
-                }
-                if (effects.hygiene !== undefined) {
-                  newPlayer.hygiene = Math.min(100, Math.max(0, prevPlayer.hygiene + effects.hygiene));
-                  msg += `${effects.hygiene > 0 ? '+' : ''}${effects.hygiene} Hygiene, `;
-                }
-                msg += `-1 ${itemToUse}.`;
-                alertMessage = msg;
                 return newPlayer;
-              });
-              activityPerformedSuccessfully = true;
-            } else {
-              willAnimate = false; // No animation if no item was used (e.g., if prompt was cancelled)
-            }
-            break;
-
-        case 'Swim':
-          if (player.location === 'Beach') {
-            const energyCost = 20;
-            const hygieneCost = 10;
-            if (player.energy >= energyCost) {
-              setPlayer(prevPlayer => ({
-                ...prevPlayer,
-                happiness: Math.min(100, prevPlayer.happiness + 25),
-                energy: Math.max(0, prevPlayer.energy - energyCost),
-                hygiene: Math.max(0, prevPlayer.hygiene - hygieneCost),
-              }));
-              alertMessage = `You swam at ${player.location}. +25 Happiness, -${energyCost} Energy, -${hygieneCost} Hygiene.`;
-              activityPerformedSuccessfully = true;
-            } else {
-              alertMessage = `You don't have enough energy (${energyCost}) to swim!`; willAnimate = false;
-            }
-          } else {
-            alertMessage = `You can only swim at the Beach!`; willAnimate = false;
-          }
-          break;
-
-        case 'Fishing':
-          if (player.location === 'Lake') {
-            const energyCost = 20;
-            const hygieneCost = 10;
-            if (player.energy >= energyCost) {
-              setPlayer(prevPlayer => ({
-                ...prevPlayer,
-                happiness: Math.min(100, prevPlayer.happiness + 25),
-                energy: Math.max(0, prevPlayer.energy - energyCost),
-                hygiene: Math.max(0, prevPlayer.hygiene - hygieneCost),
-                inventory: {
-                  ...prevPlayer.inventory,
-                  'Fish': { type: 'food', stock: (prevPlayer.inventory['Fish']?.stock || 0) + 1 }
-                }
-              }));
-              alertMessage = `You fished at ${player.location}. +25 Happiness, -${energyCost} Energy, -${hygieneCost} Hygiene, +1 Fish.`;
-              activityPerformedSuccessfully = true;
-            } else {
-              alertMessage = `You don't have enough energy (${energyCost}) to fish!`; willAnimate = false;
-            }
-          } else {
-            alertMessage = `You can only fish at the Lake!`; willAnimate = false;
-          }
-          break;
-
-        case 'Hike':
-          if (player.location === 'Mountain') {
-            const energyCost = 25;
-            const hungerCost = 15;
-            if (player.energy >= energyCost) {
-              setPlayer(prevPlayer => ({
-                ...prevPlayer,
-                happiness: Math.min(100, prevPlayer.happiness + 30),
-                energy: Math.max(0, prevPlayer.energy - energyCost),
-                hunger: Math.max(0, prevPlayer.hunger - hungerCost),
-              }));
-              alertMessage = `You hiked in the Mountains. +30 Happiness, -${energyCost} Energy, -${hungerCost} Hunger.`;
-              activityPerformedSuccessfully = true;
-            } else {
-              alertMessage = `You don't have enough energy (${energyCost}) to hike!`; willAnimate = false;
-            }
-          } else {
-            alertMessage = `You can only hike in the Mountains!`; willAnimate = false;
-          }
-          break;
-
-        case 'Sleep':
-          if (player.location === 'Home') {
-            const energyGain = 50;
-            setPlayer(prevPlayer => ({ ...prevPlayer, energy: Math.min(100, prevPlayer.energy + energyGain) }));
-            setGameTime(prevTime => {
-              let newHour = prevTime.hour + 6;
-              let newDay = prevTime.day;
-              if (newHour >= 24) {
-                newDay += Math.floor(newHour / 24);
-                newHour %= 24;
-              }
-              return { ...prevTime, hour: newHour, minute: 0, day: newDay };
             });
-            alertMessage = "You slept. +50 Energy, 6 hours passed.";
-            activityPerformedSuccessfully = true;
-          } else {
-            alertMessage = "You can only sleep at home!"; willAnimate = false;
-          }
-          break;
+            // Mark event as triggered using its original ID
+            triggeredEventsRef.current = { ...triggeredEventsRef.current, [currentEvent.id]: true };
+            setShowEventPopup(false);
+            setCurrentEvent(null);
+        }
+    }, [currentEvent, setPlayer]);
 
-        case 'Take a Bath':
-          if (player.location === 'Home') {
-            const hygieneGain = 40;
-            const energyCost = 5;
-            if (player.energy >= energyCost) {
-              setPlayer(prevPlayer => ({
-                ...prevPlayer,
-                hygiene: Math.min(100, prevPlayer.hygiene + hygieneGain),
-                energy: Math.max(0, prevPlayer.energy - energyCost),
-              }));
-              alertMessage = "You took a bath. +40 Hygiene, -5 Energy.";
-              activityPerformedSuccessfully = true;
-            } else {
-              alertMessage = `You don't have enough energy (${energyCost}) to take a bath!`; willAnimate = false;
-            }
-          } else {
-            alertMessage = "You can only take a bath at home!"; willAnimate = false;
-          }
-          break;
+    const handleMove = useCallback((direction) => {
+        if (isActivityAnimating) return;
+        if (player.energy < 1) {
+            alert("You don't have enough energy to move!");
+            setIsWalking(false);
+            return;
+        }
 
-        case 'Buy Souvenir':
-          if (player.location !== 'Home') {
-            const souvenirCost = 200000;
-            if (player.money >= souvenirCost) {
-              setPlayer(prevPlayer => ({
-                ...prevPlayer,
-                money: prevPlayer.money - souvenirCost,
-                happiness: Math.min(100, prevPlayer.happiness + 20),
-                inventory: {
-                  ...prevPlayer.inventory,
-                  'Souvenir': {
-                    type: 'collectible',
-                    stock: (prevPlayer.inventory['Souvenir']?.stock || 0) + 1
-                  }
-                }
-              }));
-              alertMessage = `You bought a souvenir in ${player.location}. -IDR 200,000, +20 Happiness, +1 Souvenir.`;
-              activityPerformedSuccessfully = true;
-            } else {
-              alertMessage = `You don't have enough money (IDR ${souvenirCost.toLocaleString()} required) to buy a souvenir!`; willAnimate = false;
-            }
-          } else {
-            alertMessage = "There are no souvenirs to buy at home!"; willAnimate = false;
-          }
-          break;
+        const moveDistance = 2;
+        let newX = avatarPosition.x;
+        let newY = avatarPosition.y;
 
-        case 'Explore':
-        case 'Explore Area':
-          if (player.location !== 'Home' && player.location !== 'Mountain') {
-            const energyCost = 20;
-            const hygieneCost = 10;
-            if (player.energy >= energyCost) {
-              setPlayer(prevPlayer => ({
-                ...prevPlayer,
-                happiness: Math.min(100, prevPlayer.happiness + 25),
-                energy: Math.max(0, prevPlayer.energy - energyCost),
-                hygiene: Math.max(0, prevPlayer.hygiene - hygieneCost),
-              }));
-              alertMessage = `You explored ${player.location}. +25 Happiness, -${energyCost} Energy, -${hygieneCost} Hygiene.`;
-              activityPerformedSuccessfully = true;
-            } else {
-              alertMessage = `You don't have enough energy (${energyCost}) to explore!`; willAnimate = false;
-            }
-          } else if (player.location === 'Home') {
-            alertMessage = "There's nothing new to explore at home!"; willAnimate = false;
-          } else if (player.location === 'Mountain') {
-            alertMessage = "You should 'Hike' in the mountains instead of 'Explore'!"; willAnimate = false;
-          }
-          break;
+        switch (direction) {
+            case 'up': newY = Math.max(5, avatarPosition.y - moveDistance); break;
+            case 'down': newY = Math.min(95, avatarPosition.y + moveDistance); break;
+            case 'left': newX = Math.max(5, avatarPosition.x - moveDistance); break;
+            case 'right': newX = Math.min(95, avatarPosition.x + moveDistance); break;
+            default: break;
+        }
 
-        case 'Pray':
-          if (player.location === 'Temple') {
-            const energyCost = 10;
-            if (player.energy >= energyCost) {
-              let happinessBonus = 0;
-              let energyBonus = 0;
-              if (player.inventory['Meditation Guide'] && player.inventory['Meditation Guide'].stock > 0) {
-                if (NON_CONSUMABLE_ITEM_EFFECTS['Meditation Guide']?.activityBonus?.['Pray']) {
-                  happinessBonus = NON_CONSUMABLE_ITEM_EFFECTS['Meditation Guide'].activityBonus['Pray'].happiness || 0;
-                  energyBonus = NON_CONSUMABLE_ITEM_EFFECTS['Meditation Guide'].activityBonus['Pray'].energy || 0;
-                }
-              }
-              setPlayer(prevPlayer => ({
-                ...prevPlayer,
-                happiness: Math.min(100, prevPlayer.happiness + 30 + happinessBonus),
-                energy: Math.min(100, prevPlayer.energy - energyCost + energyBonus),
-              }));
-              alertMessage = `You prayed at the Temple. +${30 + happinessBonus} Happiness, -${energyCost - energyBonus} Energy.${happinessBonus > 0 || energyBonus > 0 ? ' (Meditation Guide blessing!)' : ''}`;
-              activityPerformedSuccessfully = true;
-            } else {
-              alertMessage = `You don't have enough energy (${energyCost}) to pray!`; willAnimate = false;
-            }
-          } else {
-            alertMessage = "You can only pray at the Temple!"; willAnimate = false;
-          }
-          break;
+        setAvatarPosition({ x: newX, y: newY });
+        setPlayer(prevPlayer => ({
+            ...prevPlayer,
+            energy: Math.max(0, prevPlayer.energy - 1)
+        }));
 
-        default:
-          alertMessage = `Unknown activity: ${activity}`; willAnimate = false;
-          break;
-      }
+        setIsWalking(true);
+        if (walkTimeout.current) clearTimeout(walkTimeout.current);
+        walkTimeout.current = setTimeout(() => setIsWalking(false), 300);
 
-      // --- Logika Pengklaiman Hadiah Event (Setelah Animasi Selesai) ---
-      // Ini akan dipanggil setelah animasi selesai atau di-fast forward
-      if (activityPerformedSuccessfully && currentEvent &&
-          currentEvent.location === player.location &&
-          currentEvent.requiredActivity === activity) {
-        applyEventRewards();
+    }, [player.energy, avatarPosition, isActivityAnimating]);
+
+    const handleBackToMainMap = useCallback(() => {
+        if (isActivityAnimating) return;
+
+        const travelEnergyCost = 15;
+        const travelMoneyCost = 50000;
+
+        if (player.money < travelMoneyCost) {
+            alert(`Insufficient money to go back to Main Map (Rp ${travelMoneyCost.toLocaleString()} required).`);
+            return;
+        }
+        if (player.energy < travelEnergyCost) {
+            alert(`You don't have enough energy (${travelEnergyCost}) to go back to Main Map!`);
+            return;
+        }
+
+        if (isReturningToMainMapRef.current) return;
+        isReturningToMainMapRef.current = true;
+
+        // --- TAMBAHKAN DUA BARIS INI DI SINI ---
         setShowEventPopup(false);
         setCurrentEvent(null);
-      }
+        // --- AKHIR PENAMBAHAN ---
 
-      if (alertMessage) {
-        alert(alertMessage);
-      }
-    }; // END performActivityLogic
+        const performBackToMainMapEffect = (prevPlayer) => {
+            if (prevPlayer.location === 'MainMap') {
+                return prevPlayer;
+            }
+            return {
+                ...prevPlayer,
+                location: 'MainMap',
+                energy: Math.max(0, prevPlayer.energy - travelEnergyCost),
+                money: Math.max(0, prevPlayer.money - travelMoneyCost),
+                happiness: Math.min(100, prevPlayer.happiness + 5),
+            };
+        };
 
-    // --- Start Activity Animation Logic ---
-    if (willAnimate && ACTIVITY_GIFS[activity]) {
-        setCurrentActivityGif(ACTIVITY_GIFS[activity]);
+        setCurrentActivityGif(ACTIVITY_GIFS['Go to MainMap']);
         setIsActivityAnimating(true);
-        // Store the activity logic to be executed after animation or fast-forward
-        pendingActivity.current = performActivityLogic;
+        pendingActivity.current = {
+            activityName: 'Go to MainMap',
+            effectToApply: performBackToMainMapEffect,
+            alertMessage: `You returned to Main Map. -${travelEnergyCost} Energy, -Rp${travelMoneyCost.toLocaleString()} Money, +5 Happiness.`,
+            isLocationChange: true
+        };
 
         activityTimeoutRef.current = setTimeout(() => {
             setIsActivityAnimating(false);
             setCurrentActivityGif(null);
             if (pendingActivity.current) {
-                pendingActivity.current(); // Execute the stored logic
-                pendingActivity.current = null; // Clear it
+                const { activityName: completedActivityName, effectToApply: completedEffect, alertMessage: finalAlertMessage, isLocationChange: isCompletedLocationChange } = pendingActivity.current;
+
+                if (completedEffect) {
+                    setPlayer(prevPlayer => {
+                        const updatedPlayer = completedEffect(prevPlayer);
+                        if (isCompletedLocationChange && updatedPlayer.location !== prevPlayer.location) {
+                            setAvatarPosition({ x: 50, y: 50 });
+                            // Dua baris ini sekarang bisa dihapus karena sudah dipindahkan ke atas
+                            // setCurrentEvent(null);
+                            // setShowEventPopup(false);
+                            triggerLocationEvent(updatedPlayer.location, updatedPlayer);
+                        }
+                        return updatedPlayer;
+                    });
+                }
+                if (finalAlertMessage) alert(finalAlertMessage);
+
+                isReturningToMainMapRef.current = false;
+                pendingActivity.current = null;
             }
-        }, 7000); // 7 seconds animation
-    } else {
-        // If no animation, execute immediately
-        performActivityLogic();
-    }
-  }, [player, currentEvent, applyEventRewards, handleBackToMainMap, mapAreas.MainMap, triggerLocationEvent, isActivityAnimating]); // isActivityAnimating added to dependencies
+        }, 7000);
+    }, [player, setPlayer, triggerLocationEvent, isActivityAnimating]);
+    
+    const handleActivity = useCallback((activityName, duration = 7000) => {
+        if (isActivityAnimating) return;
 
-  // --- NEW: Fast Forward Function ---
-  const handleFastForward = useCallback(() => {
-    if (isActivityAnimating) {
-      if (activityTimeoutRef.current) {
-        clearTimeout(activityTimeoutRef.current); // Clear the animation timeout
-      }
-      setIsActivityAnimating(false); // Stop animation
-      setCurrentActivityGif(null); // Clear GIF
-      if (pendingActivity.current) {
-        pendingActivity.current(); // Execute the stored activity logic immediately
-        pendingActivity.current = null; // Clear it
-      }
-    }
-  }, [isActivityAnimating]);
-  // --- END NEW ---
+        let alertMessage = "";
+        let activityCostMet = true;
+        let effectToApply = null;
+        let isLocationChangeActivity = false;
 
+        switch (activityName) {
+            case 'Work':
+                if (player.energy < 20) { alertMessage = "You don't have enough energy (20) to work!"; activityCostMet = false; }
+                else if (player.location !== 'Home' && player.location !== 'MainMap') { alertMessage = `You cannot work in ${player.location}! Try at home or Main Map.`; activityCostMet = false; }
+                else {
+                    effectToApply = (prevPlayer) => ({
+                        ...prevPlayer,
+                        money: prevPlayer.money + 500000,
+                        energy: Math.max(0, prevPlayer.energy - 20),
+                        happiness: Math.max(0, prevPlayer.happiness - 5),
+                        hunger: Math.max(0, prevPlayer.hunger - 10),
+                    });
+                    alertMessage = "You worked hard! +IDR 500,000, -20 Energy, -5 Happiness, -10 Hunger.";
+                }
+                break;
+            case 'Eat':
+            case 'Use Consumable Item':
+                const availableConsumableItems = Object.keys(player.inventory).filter(itemName =>
+                    (player.inventory[itemName]?.type === 'food' || player.inventory[itemName]?.type === 'plant') &&
+                    player.inventory[itemName]?.stock > 0 && CONSUMABLE_ITEM_EFFECTS[itemName]
+                );
 
-  useEffect(() => {
-    let keysPressed = {};
+                let itemToUse = null;
+                if (activityName === 'Use Consumable Item' && availableConsumableItems.length > 0) {
+                    itemToUse = prompt(`Select an item to use (available: ${availableConsumableItems.join(', ')}):`);
+                    if (!itemToUse || !availableConsumableItems.includes(itemToUse)) { alertMessage = "Invalid choice or item not available."; activityCostMet = false; break; }
+                } else if (activityName === 'Eat' && player.location === 'Home') {
+                    if (availableConsumableItems.length > 0) { itemToUse = availableConsumableItems[0]; }
+                    else { alertMessage = "You don't have any food to eat at home! Try buying some or fishing."; activityCostMet = false; break; }
+                } else if (activityName === 'Eat' && player.location !== 'Home') {
+                    const restaurantCost = 100000;
+                    if (player.money < restaurantCost) { alertMessage = "You don't have enough money to eat at a restaurant!"; activityCostMet = false; break; }
+                    effectToApply = (prevPlayer) => ({
+                        ...prevPlayer, money: prevPlayer.money - restaurantCost, hunger: Math.min(100, prevPlayer.hunger + 40),
+                        happiness: Math.min(100, prevPlayer.happiness + 10), energy: Math.min(100, prevPlayer.energy + 10),
+                    });
+                    alertMessage = `You ate at a restaurant in ${player.location}. -IDR 100,000, +40 Hunger, +10 Happiness, +10 Energy.`;
+                    break;
+                } else { alertMessage = "No consumable items available or invalid choice."; activityCostMet = false; break; }
 
-    const handleKeyDown = (event) => {
-      // Disable movement and activity start if animating or popup is open
-      if (!gameStarted || gameOver || showEventPopup || isActivityAnimating) {
-        if (walkTimeout.current) clearTimeout(walkTimeout.current);
-        setIsWalking(false);
-        return;
-      }
-
-      const key = event.key.toLowerCase();
-      keysPressed[key] = true;
-
-      let direction = null;
-      switch (key) {
-        case 'arrowup': case 'w': direction = 'up'; break;
-        case 'arrowdown': case 's': direction = 'down'; break;
-        case 'arrowleft': case 'a': direction = 'left'; break;
-        case 'arrowright': case 'd': direction = 'right'; break;
-        default: break;
-      }
-
-      if (direction) {
-        event.preventDefault();
-        handleMove(direction);
-
-        if (!isWalking) {
-          setIsWalking(true);
+                if (itemToUse) {
+                    const effects = CONSUMABLE_ITEM_EFFECTS[itemToUse];
+                    effectToApply = (prevPlayer) => {
+                        let newPlayer = { ...prevPlayer };
+                        newPlayer.inventory = { ...newPlayer.inventory, [itemToUse]: { ...newPlayer.inventory[itemToUse], stock: newPlayer.inventory[itemToUse].stock - 1 } };
+                        if (newPlayer.inventory[itemToUse].stock <= 0) { const { [itemToUse]: _, ...restInventory } = newPlayer.inventory; newPlayer.inventory = restInventory; }
+                        if (effects.hunger !== undefined) { newPlayer.hunger = Math.min(100, Math.max(0, prevPlayer.hunger + effects.hunger)); }
+                        if (effects.energy !== undefined) { newPlayer.energy = Math.min(100, Math.max(0, prevPlayer.energy + effects.energy)); }
+                        if (effects.happiness !== undefined) { newPlayer.happiness = Math.min(100, Math.max(0, prevPlayer.happiness + effects.happiness)); }
+                        if (effects.hygiene !== undefined) { newPlayer.hygiene = Math.min(100, Math.max(0, prevPlayer.hygiene + effects.hygiene)); }
+                        return newPlayer;
+                    };
+                    let msg = `You used ${itemToUse}. `;
+                    if (effects.hunger !== undefined) msg += `${effects.hunger > 0 ? '+' : ''}${effects.hunger} Hunger, `;
+                    if (effects.energy !== undefined) msg += `${effects.energy > 0 ? '+' : ''}${effects.energy} Energy, `;
+                    if (effects.happiness !== undefined) msg += `${effects.happiness > 0 ? '+' : ''}${effects.happiness} Happiness, `;
+                    if (effects.hygiene !== undefined) msg += `${effects.hygiene > 0 ? '+' : ''}${effects.hygiene} Hygiene, `;
+                    msg += `-1 ${itemToUse}.`;
+                    alertMessage = msg;
+                } else { activityCostMet = false; }
+                break;
+            case 'Swim':
+                const swimEnergyCost = 20; const swimHygieneCost = 10;
+                if (player.location !== 'Beach') { alertMessage = `You can only swim at the Beach!`; activityCostMet = false; }
+                else if (player.energy < swimEnergyCost) { alertMessage = `You don't have enough energy (${swimEnergyCost}) to swim!`; activityCostMet = false; }
+                else {
+                    effectToApply = (prevPlayer) => ({ ...prevPlayer, happiness: Math.min(100, prevPlayer.happiness + 25), energy: Math.max(0, prevPlayer.energy - swimEnergyCost), hygiene: Math.max(0, prevPlayer.hygiene - swimHygieneCost), });
+                    alertMessage = `You swam at ${player.location}. +25 Happiness, -${swimEnergyCost} Energy, -${swimHygieneCost} Hygiene.`;
+                }
+                break;
+            case 'Fishing':
+                const fishEnergyCost = 20; const fishHygieneCost = 10;
+                if (player.location !== 'Lake') { alertMessage = `You can only fish at the Lake!`; activityCostMet = false; }
+                else if (player.energy < fishEnergyCost) { alertMessage = `You don't have enough energy (${fishEnergyCost}) to fish!`; activityCostMet = false; }
+                else {
+                    effectToApply = (prevPlayer) => ({ ...prevPlayer, happiness: Math.min(100, prevPlayer.happiness + 25), energy: Math.max(0, prevPlayer.energy - fishEnergyCost), hygiene: Math.max(0, prevPlayer.hygiene - fishHygieneCost), inventory: { ...prevPlayer.inventory, 'Fish': { type: 'food', stock: (prevPlayer.inventory['Fish']?.stock || 0) + 1 } } });
+                    alertMessage = `You fished at ${player.location}. +25 Happiness, -${fishEnergyCost} Energy, -${fishHygieneCost} Hygiene, +1 Fish.`;
+                }
+                break;
+            case 'Hike':
+                const hikeEnergyCost = 25; const hikeHungerCost = 15;
+                if (player.location !== 'Mountain') { alertMessage = `You can only hike in the Mountains!`; activityCostMet = false; }
+                else if (player.energy < hikeEnergyCost) { alertMessage = `You don't have enough energy (${hikeEnergyCost}) to hike!`; activityCostMet = false; }
+                else {
+                    effectToApply = (prevPlayer) => ({ ...prevPlayer, happiness: Math.min(100, prevPlayer.happiness + 30), energy: Math.max(0, prevPlayer.energy - hikeEnergyCost), hunger: Math.max(0, prevPlayer.hunger - hikeHungerCost), });
+                    alertMessage = `You hiked in the Mountains. +30 Happiness, -${hikeEnergyCost} Energy, -${hikeHungerCost} Hunger.`;
+                }
+                break;
+            case 'Sleep':
+                const sleepEnergyGain = 50;
+                if (player.location !== 'Home') { alertMessage = "You can only sleep at home!"; activityCostMet = false; }
+                else {
+                    effectToApply = (prevPlayer) => {
+                        setGameTime(prevTime => {
+                            let newHour = prevTime.hour + 6;
+                            let newDay = prevTime.day;
+                            if (newHour >= 24) { newDay += Math.floor(newHour / 24); newHour %= 24; }
+                            return { ...prevTime, hour: newHour, minute: 0, day: newDay };
+                        });
+                        return { ...prevPlayer, energy: Math.min(100, prevPlayer.energy + sleepEnergyGain) };
+                    };
+                    alertMessage = "You slept. +50 Energy, 6 hours passed.";
+                }
+                break;
+            case 'Take a Bath':
+                const bathHygieneGain = 40; const bathEnergyCost = 5;
+                if (player.location !== 'Home') { alertMessage = "You can only take a bath at home!"; activityCostMet = false; }
+                else if (player.energy < bathEnergyCost) { alertMessage = `You don't have enough energy (${bathEnergyCost}) to take a bath!`; activityCostMet = false; }
+                else {
+                    effectToApply = (prevPlayer) => ({ ...prevPlayer, hygiene: Math.min(100, prevPlayer.hygiene + bathHygieneGain), energy: Math.max(0, prevPlayer.energy - bathEnergyCost), });
+                    alertMessage = "You took a bath. +40 Hygiene, -5 Energy.";
+                }
+                break;
+            case 'Buy Souvenir':
+                const souvenirCost = 200000;
+                if (player.location === 'Home') { alertMessage = "There are no souvenirs to buy at home!"; activityCostMet = false; }
+                else if (player.money < souvenirCost) { alertMessage = `You don't have enough money (IDR ${souvenirCost.toLocaleString()} required) to buy a souvenir!`; activityCostMet = false; }
+                else {
+                    effectToApply = (prevPlayer) => ({ ...prevPlayer, money: prevPlayer.money - souvenirCost, happiness: Math.min(100, prevPlayer.happiness + 20), inventory: { ...prevPlayer.inventory, 'Souvenir': { type: 'collectible', stock: (prevPlayer.inventory['Souvenir']?.stock || 0) + 1 } } });
+                    alertMessage = `You bought a souvenir in ${player.location}. -IDR 200,000, +20 Happiness, +1 Souvenir.`;
+                }
+                break;
+            case 'Explore':
+            case 'Explore Area':
+                const exploreEnergyCost = 20; const exploreHygieneCost = 10;
+                if (player.location === 'Home') { alertMessage = "There's nothing new to explore at home!"; activityCostMet = false; }
+                else if (player.location === 'Mountain') { alertMessage = "You should 'Hike' in the mountains instead of 'Explore'!"; activityCostMet = false; }
+                else if (player.energy < exploreEnergyCost) { alertMessage = `You don't have enough energy (${exploreEnergyCost}) to explore!`; activityCostMet = false; }
+                else {
+                    effectToApply = (prevPlayer) => ({ ...prevPlayer, happiness: Math.min(100, prevPlayer.happiness + 25), energy: Math.max(0, prevPlayer.energy - exploreEnergyCost), hygiene: Math.max(0, prevPlayer.hygiene - exploreHygieneCost), });
+                    alertMessage = `You explored ${player.location}. +25 Happiness, -${exploreEnergyCost} Energy, -${exploreHygieneCost} Hygiene.`;
+                }
+                break;
+            case 'Pray':
+                const prayEnergyCost = 10;
+                if (player.location !== 'Temple') { alertMessage = "You can only pray at the Temple!"; activityCostMet = false; }
+                else if (player.energy < prayEnergyCost) { alertMessage = `You don't have enough energy (${prayEnergyCost}) to pray!`; activityCostMet = false; }
+                else {
+                    let happinessBonus = 0; let energyBonus = 0;
+                    if (player.inventory['Meditation Guide'] && player.inventory['Meditation Guide'].stock > 0) {
+                        if (NON_CONSUMABLE_ITEM_EFFECTS['Meditation Guide']?.activityBonus?.['Pray']) {
+                            happinessBonus = NON_CONSUMABLE_ITEM_EFFECTS['Meditation Guide'].activityBonus['Pray'].happiness || 0;
+                            energyBonus = NON_CONSUMABLE_ITEM_EFFECTS['Meditation Guide'].activityBonus['Pray'].energy || 0;
+                        }
+                    }
+                    effectToApply = (prevPlayer) => ({ ...prevPlayer, happiness: Math.min(100, prevPlayer.happiness + 30 + happinessBonus), energy: Math.min(100, prevPlayer.energy - prayEnergyCost + energyBonus), });
+                    alertMessage = `You prayed at the Temple. +${30 + happinessBonus} Happiness, -${prayEnergyCost - energyBonus} Energy.${happinessBonus > 0 || energyBonus > 0 ? ' (Meditation Guide blessing!)' : ''}`;
+                }
+                break;
+            case 'Go to Home':
+            case 'Go to Mountain':
+            case 'Go to Lake':
+            case 'Go to Beach':
+            case 'Go to Temple':
+                const targetLocation = activityName.replace('Go to ', '');
+                isLocationChangeActivity = true; // Set flag
+                // Handle travel from MainMap to sub-location
+                if (player.location === 'MainMap' && MAP_AREAS.MainMap[targetLocation]) {
+                    const travelEnergyCost = 15;
+                    const travelMoneyCost = 500000;
+                    if (player.money < travelMoneyCost) { alertMessage = `Insufficient money to travel to ${targetLocation} (Rp ${travelMoneyCost.toLocaleString()} required).`; activityCostMet = false; }
+                    else if (player.energy < travelEnergyCost) { alertMessage = `You don't have enough energy (${travelEnergyCost}) to travel to ${targetLocation}!`; activityCostMet = false; }
+                    else {
+                        effectToApply = (prevPlayer) => ({
+                            ...prevPlayer, location: targetLocation, energy: Math.max(0, prevPlayer.energy - travelEnergyCost),
+                            money: Math.max(0, prevPlayer.money - travelMoneyCost), happiness: Math.min(100, prevPlayer.happiness + 5),
+                        });
+                        alertMessage = `You traveled to ${targetLocation}. -${travelEnergyCost} Energy, -Rp${travelMoneyCost.toLocaleString()} Money, +5 Happiness.`;
+                    }
+                } else {
+                    alertMessage = `Invalid travel to ${targetLocation} from ${player.location}.`; activityCostMet = false;
+                }
+                break;
+            default:
+                alertMessage = `Unknown activity: ${activityName}`; activityCostMet = false;
+                break;
         }
-        if (walkTimeout.current) {
-          clearTimeout(walkTimeout.current);
+
+        // --- Jika biaya/kondisi tidak terpenuhi, tampilkan alert dan KELUAR ---
+        if (!activityCostMet) {
+            if (alertMessage) alert(alertMessage);
+            return;
         }
-        walkTimeout.current = setTimeout(() => {
-          const anyMovementKey = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].some(k => keysPressed[k]);
-          if (!anyMovementKey) {
-            setIsWalking(false);
-          }
-        }, 150);
-      }
-    };
 
-    const handleKeyUp = (event) => {
-      const key = event.key.toLowerCase();
-      keysPressed[key] = false;
+        // --- Jika semua cek terpenuhi, baru jalankan animasi dan efek ---
+        const gif = ACTIVITY_GIFS[activityName];
+        if (gif) {
+            setCurrentActivityGif(gif);
+            setIsActivityAnimating(true);
+            pendingActivity.current = { activityName, effectToApply, alertMessage, isLocationChange: isLocationChangeActivity }; // Simpan flag
 
-      const anyMovementKey = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright']
-        .some(k => keysPressed[k]);
+            activityTimeoutRef.current = setTimeout(() => {
+                if (pendingActivity.current) {
+                    const { activityName: completedActivityName, effectToApply: completedEffect, alertMessage: finalAlertMessage, isLocationChange: isCompletedLocationChange } = pendingActivity.current;
 
-      if (!anyMovementKey) {
-        if (walkTimeout.current) clearTimeout(walkTimeout.current);
-        setIsWalking(false);
-      }
-    };
+                    if (completedEffect) {
+                        setPlayer(prevPlayer => {
+                            const updatedPlayer = completedEffect(prevPlayer);
+                            // Logika untuk perubahan lokasi setelah efek diterapkan
+                            if (isCompletedLocationChange && updatedPlayer.location !== prevPlayer.location) {
+                                setAvatarPosition({ x: 50, y: 50 });
+                                setCurrentEvent(null);
+                                setShowEventPopup(false);
+                                triggerLocationEvent(updatedPlayer.location, updatedPlayer);
+                            }
+                            return updatedPlayer;
+                        });
+                    }
+                    if (finalAlertMessage) alert(finalAlertMessage);
 
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
+                    // Pengecekan event hanya jika BUKAN perubahan lokasi
+                    // Atau jika event itu adalah event yang dipicu di lokasi saat ini
+                    if (currentEvent &&
+                        (currentEvent.triggerLocation === player.location || !isCompletedLocationChange) && // Cek triggerLocation atau bukan perpindahan lokasi
+                        currentEvent.requiredActivity === completedActivityName &&
+                        !triggeredEventsRef.current[currentEvent.id]
+                    ) {
+                        applyEventRewards();
+                    } else if (currentEvent && currentEvent.triggerLocation !== player.location) { // Jika event tidak relevan dengan lokasi sekarang
+                        setCurrentEvent(null);
+                        setShowEventPopup(false);
+                    }
 
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-      if (walkTimeout.current) clearTimeout(walkTimeout.current);
-    };
-  }, [gameStarted, gameOver, showEventPopup, handleMove, isWalking, isActivityAnimating]); // isActivityAnimating added to dependencies
+                    pendingActivity.current = null;
+                }
+                setIsActivityAnimating(false);
+                setCurrentActivityGif(null);
+            }, duration);
+        } else { // No GIF, immediate effect
+            if (effectToApply) {
+                setPlayer(prevPlayer => {
+                    const updatedPlayer = effectToApply(prevPlayer);
+                    if (isLocationChangeActivity && updatedPlayer.location !== prevPlayer.location) {
+                        setAvatarPosition({ x: 50, y: 50 });
+                        setCurrentEvent(null);
+                        setShowEventPopup(false);
+                        triggerLocationEvent(updatedPlayer.location, updatedPlayer);
+                    }
+                    return updatedPlayer;
+                });
+            }
+            if (alertMessage) alert(alertMessage);
 
-  return (
-    <div className="app-container">
-      {!gameStarted && (
-        <AvatarSelection onAvatarSelect={selectAvatar} onStartGame={startGame} />
-      )}
+            if (currentEvent &&
+                (currentEvent.triggerLocation === player.location || !isLocationChangeActivity) && // Cek triggerLocation atau bukan perpindahan lokasi
+                currentEvent.requiredActivity === activityName &&
+                !triggeredEventsRef.current[currentEvent.id]
+            ) {
+                applyEventRewards();
+            } else if (currentEvent && currentEvent.triggerLocation !== player.location) { // Jika event tidak relevan dengan lokasi sekarang
+                setCurrentEvent(null);
+                setShowEventPopup(false);
+            }
+        }
+    }, [player, currentEvent, applyEventRewards, triggerLocationEvent, isActivityAnimating]);
 
-      {gameStarted && !gameOver && (
-        <GameScreen
-          player={player}
-          gameTime={gameTime}
-          avatarPosition={avatarPosition}
-          onMove={handleMove}
-          onBackToMainMap={handleBackToMainMap}
-          onActivity={handleActivity}
-          isWalking={isWalking}
-          // --- NEW PROPS ---
-          isActivityAnimating={isActivityAnimating}
-          currentActivityGif={currentActivityGif}
-          onFastForward={handleFastForward}
-          // --- END NEW PROPS ---
-        />
-      )}
 
-      {gameOver && <GameOverScreen player={player} onRestart={restartGame} />}
+    const handleFastForward = useCallback(() => {
+        if (isActivityAnimating) {
+            if (activityTimeoutRef.current) {
+                clearTimeout(activityTimeoutRef.current);
+            }
+            setIsActivityAnimating(false);
+            setCurrentActivityGif(null);
 
-      {showEventPopup && currentEvent && (
-        <EventPopup
-          event={currentEvent}
-          onClose={() => {
-            setShowEventPopup(false);
-          }}
-        />
-      )}
-    </div>
-  );
+            if (pendingActivity.current) {
+                const { activityName: completedActivityName, effectToApply: completedEffect, alertMessage: finalAlertMessage, isLocationChange: isCompletedLocationChange } = pendingActivity.current;
+
+                if (completedEffect) {
+                    setPlayer(prevPlayer => {
+                        const updatedPlayer = completedEffect(prevPlayer); // Panggil efek yang disimpan
+
+                        // Logika perubahan lokasi untuk fast-forward
+                        if (isCompletedLocationChange && updatedPlayer.location !== prevPlayer.location) {
+                            setAvatarPosition({ x: 50, y: 50 });
+                            setCurrentEvent(null);
+                            setShowEventPopup(false);
+                            triggerLocationEvent(updatedPlayer.location, updatedPlayer);
+                        }
+                        return updatedPlayer;
+                    });
+                }
+
+                if (finalAlertMessage) {
+                    alert(finalAlertMessage);
+                }
+
+                // Pengecekan event hanya jika BUKAN perubahan lokasi
+                if (!isCompletedLocationChange && currentEvent &&
+                    currentEvent.triggerLocation === player.location && // <--- Gunakan triggerLocation di sini juga
+                    currentEvent.requiredActivity === completedActivityName &&
+                    !triggeredEventsRef.current[currentEvent.id]
+                ) {
+                    applyEventRewards();
+                } else if (currentEvent && currentEvent.triggerLocation !== player.location) { // Jika event tidak relevan dengan lokasi sekarang
+                    setCurrentEvent(null);
+                    setShowEventPopup(false);
+                }
+
+
+                if (completedActivityName === 'Go to MainMap') {
+                    isReturningToMainMapRef.current = false;
+                }
+
+                pendingActivity.current = null;
+            }
+        }
+    }, [isActivityAnimating, currentEvent, applyEventRewards, triggerLocationEvent, player]); // `player` masih perlu di sini untuk `currentEvent.location === player.location` check
+
+    // --- useEffect untuk Game Time ---
+    useEffect(() => {
+        if (isAvatarSelected && !gameOver) {
+            timeIntervalRef.current = setInterval(() => {
+                setGameTime(prevTime => {
+                    let newMinute = prevTime.minute + 10;
+                    let newHour = prevTime.hour;
+                    let newDay = prevTime.day;
+
+                    let hourChanged = false;
+                    if (newMinute >= 60) {
+                        newHour += Math.floor(newMinute / 60);
+                        newMinute %= 60;
+                        hourChanged = true;
+                    }
+
+                    if (newHour >= 24) {
+                        newDay += Math.floor(newHour / 24);
+                        newHour %= 24;
+                    }
+
+                    if (hourChanged && (newHour % 6 === 0 || (prevTime.hour === 23 && newHour === 5))) {
+                        decreasePlayerStatus();
+                    }
+
+                    return { hour: newHour, minute: newMinute, day: newDay };
+                });
+            }, 1000); // Setiap 1 detik = 10 menit waktu game
+        } else {
+            clearInterval(timeIntervalRef.current);
+        }
+
+        return () => clearInterval(timeIntervalRef.current);
+    }, [isAvatarSelected, gameOver, decreasePlayerStatus]);
+
+    // --- useEffect untuk Game Over ---
+    useEffect(() => {
+        if (
+            player.hunger <= 0 ||
+            player.hygiene <= 0 ||
+            player.energy <= 0 ||
+            player.happiness <= 0
+        ) {
+            if (timeIntervalRef.current) clearInterval(timeIntervalRef.current);
+            setGameOver(true);
+            setIsAvatarSelected(false);
+            alert(`Game Over! ${player.name}'s journey ended due to low stats.`);
+        }
+    }, [player]);
+
+    // --- useEffect untuk Keyboard Event Listener ---
+    useEffect(() => {
+        let keysPressed = {};
+
+        const handleKeyDown = (event) => {
+            if (!isAvatarSelected || gameOver || showEventPopup || isActivityAnimating) {
+                if (walkTimeout.current) clearTimeout(walkTimeout.current);
+                setIsWalking(false);
+                return;
+            }
+
+            const key = event.key.toLowerCase();
+            keysPressed[key] = true;
+
+            let direction = null;
+            switch (key) {
+                case 'arrowup': case 'w': direction = 'up'; break;
+                case 'down': case 's': direction = 'down'; break;
+                case 'left': case 'a': direction = 'left'; break;
+                case 'right': case 'd': direction = 'right'; break;
+                default: break;
+            }
+
+            if (direction) {
+                event.preventDefault();
+                handleMove(direction);
+
+                if (!isWalking) {
+                    setIsWalking(true);
+                }
+                if (walkTimeout.current) {
+                    clearTimeout(walkTimeout.current);
+                }
+                walkTimeout.current = setTimeout(() => {
+                    const anyMovementKey = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].some(k => keysPressed[k]);
+                    if (!anyMovementKey) {
+                        setIsWalking(false);
+                    }
+                }, 150);
+            }
+        };
+
+        const handleKeyUp = (event) => {
+            const key = event.key.toLowerCase();
+            keysPressed[key] = false;
+
+            const anyMovementKey = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright']
+                .some(k => keysPressed[k]);
+
+            if (!anyMovementKey) {
+                if (walkTimeout.current) clearTimeout(walkTimeout.current);
+                setIsWalking(false);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('keyup', handleKeyUp);
+            if (walkTimeout.current) clearTimeout(walkTimeout.current);
+        };
+    }, [isAvatarSelected, gameOver, showEventPopup, handleMove, isWalking, isActivityAnimating]);
+
+
+    // --- Render ---
+    // ... di dalam App.jsx
+
+    if (gameOver) {
+        return (
+            <GameOverScreen
+                player={player} // <-- TAMBAHKAN BARIS INI
+                onRestartGame={() => {
+                    setIsAvatarSelected(false);
+                    setGameOver(false);
+                    setPlayer({
+                        name: '',
+                        money: 750000,
+                        happiness: 50,
+                        hunger: 50,
+                        hygiene: 50,
+                        energy: 50,
+                        location: 'MainMap',
+                        inventory: {
+                            'Meat': { type: 'food', stock: 2 },
+                            'Meditation Guide': { type: 'tool', stock: 1 }
+                        },
+                        avatar: null,
+                    });
+                    setGameTime({ hour: 8, minute: 0, day: 1 });
+                    setAvatarPosition({ x: 50, y: 50 });
+                    setIsWalking(false);
+                    setShowEventPopup(false);
+                    setCurrentEvent(null);
+                    triggeredEventsRef.current = {};
+                    setIsActivityAnimating(false);
+                    setCurrentActivityGif(null);
+                    if (activityTimeoutRef.current) clearTimeout(activityTimeoutRef.current);
+                    pendingActivity.current = null;
+                    isReturningToMainMapRef.current = false;
+                }}
+            />
+        );
+    }
+    if (!isAvatarSelected) {
+        return (
+            <AvatarSelection
+                onAvatarSelect={handleSetAvatar}
+                onStartGame={handleGameStart}
+            />
+        );
+    }
+
+    return (
+        <div className="app">
+            <GameScreen
+                player={player}
+                gameTime={gameTime}
+                avatarPosition={avatarPosition}
+                onMove={handleMove}
+                onBackToMainMap={handleBackToMainMap}
+                onActivity={handleActivity}
+                isWalking={isWalking}
+                isActivityAnimating={isActivityAnimating}
+                currentActivityGif={currentActivityGif}
+                onFastForward={handleFastForward}
+            />
+            {showEventPopup && currentEvent && currentEvent.triggerLocation === player.location && ( // <--- PERUBAHAN UTAMA DI SINI
+                <EventPopup
+                    event={currentEvent} // event object itu sendiri memiliki properti 'location' asli (misal 'Temple')
+                    onClose={() => {
+                        if (currentEvent) {
+                            triggeredEventsRef.current = { ...triggeredEventsRef.current, [currentEvent.id]: true };
+                        }
+                        setShowEventPopup(false);
+                        setCurrentEvent(null);
+                    }}
+                />
+            )}
+        </div>
+    );
 };
 
 export default App;

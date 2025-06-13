@@ -2,21 +2,17 @@
 import React from 'react';
 import '../styles/ActivityDetails.css';
 
-// Import semua komponen aktivitas per lokasi yang sudah Anda buat
-// Ini berasal dari Version 2
 import HomeActivities from './activities/HomeActivities';
 import BeachActivities from './activities/BeachActivities';
 import LakeActivities from './activities/LakeActivities';
 import MountainActivities from './activities/MountainActivities';
 import TempleActivities from './activities/TempleActivities';
 
-const ActivityDetails = ({ location, onActivity }) => {
-  // Fungsi ini akan mengembalikan KOMPONEN React (dari Versi 2)
-  // atau daftar link event untuk MainMap (dari Versi 1 dan 2)
+// ActivityDetails sekarang menerima prop 'player'
+const ActivityDetails = ({ location, onActivity, player }) => { // <--- TAMBAHKAN 'player' DI SINI
   const renderActivitiesForLocation = (currentLocation) => {
     switch (currentLocation) {
       case 'MainMap':
-        // Logika rendering MainMap dari kedua versi (sama)
         return (
           <>
             <h4 className="activity-details-title">Events:</h4>
@@ -28,20 +24,15 @@ const ActivityDetails = ({ location, onActivity }) => {
           </>
         );
       case 'Home':
-        // Merender komponen aktivitas Home (dari Versi 2)
-        return <HomeActivities onActivity={onActivity} />;
+        return <HomeActivities onActivity={onActivity} player={player} />; // <--- TERUSKAN 'player' KE HomeActivities
       case 'Beach':
-        // Merender komponen aktivitas Beach (dari Versi 2)
-        return <BeachActivities onActivity={onActivity} />;
+        return <BeachActivities onActivity={onActivity} player={player} />; // <--- TERUSKAN 'player' KE BeachActivities
       case 'Lake':
-        // Merender komponen aktivitas Lake (dari Versi 2)
-        return <LakeActivities onActivity={onActivity} />;
+        return <LakeActivities onActivity={onActivity} player={player} />; // <--- TERUSKAN 'player' KE LakeActivities
       case 'Mountain':
-        // Merender komponen aktivitas Mountain (dari Versi 2)
-        return <MountainActivities onActivity={onActivity} />;
+        return <MountainActivities onActivity={onActivity} player={player} />; // <--- TERUSKAN 'player' KE MountainActivities
       case 'Temple':
-        // Merender komponen aktivitas Temple (dari Versi 2)
-        return <TempleActivities onActivity={onActivity} />;
+        return <TempleActivities onActivity={onActivity} player={player} />; // <--- TERUSKAN 'player' KE TempleActivities
       default:
         return <p>No activities available for this location.</p>;
     }
@@ -53,7 +44,6 @@ const ActivityDetails = ({ location, onActivity }) => {
         {location === 'MainMap' ? 'Main Map Events' : `Activities at ${location}`}
       </h3>
       <div className="activity-details-list">
-        {/* Memanggil fungsi render yang mengembalikan komponen atau JSX untuk MainMap */}
         {renderActivitiesForLocation(location)}
       </div>
     </div>

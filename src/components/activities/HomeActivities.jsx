@@ -2,7 +2,15 @@ import React from 'react';
 
 // Sekarang HomeActivities menerima 'player' sebagai prop
 const HomeActivities = ({ onActivity, player }) => {
-  // Pengecekan hasFood membutuhkan objek player
+  // --- PENTING: Tambahkan pengecekan ini di awal komponen ---
+  if (!player || !player.inventory) {
+    // Jika player atau inventory belum ada, jangan coba mengaksesnya.
+    // Ini bisa terjadi sesaat selama proses rendering awal atau perubahan state.
+    // Anda bisa mengembalikan null, atau div kosong, atau pesan loading.
+    return null;
+  }
+
+  // Pengecekan hasFood membutuhkan objek player dan inventory yang valid
   const hasFood = Object.keys(player.inventory).some(itemName =>
     (player.inventory[itemName].type === 'food' || player.inventory[itemName].type === 'plant') &&
     player.inventory[itemName].stock > 0
